@@ -62,7 +62,7 @@ html, body {
    com o nome/logo desenhados nelas) não recebem o dessature pesado, senão
    o texto delas fica ilegível — só um leve escurecido pra não ofuscar a UI. */
 .bg-layer--branded {
-	filter: brightness(0.5) contrast(1.0);
+	filter: saturate(0.55) brightness(0.35) contrast(0.95);
 }
 
 /* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
