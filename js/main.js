@@ -360,10 +360,35 @@
 
 		el.musicBody.innerHTML =
 			"<ul class='kv-list'>" +
-			"<li><span>Tocando agora</span><strong>" + escapeHtml(track.title) + "</strong></li>" +
-			"<li><span>Volume</span><strong>" + volumePct + "% (ambiente)</strong></li>" +
+			"<li><span>Agora</span><strong>" + escapeHtml(track.title) + "</strong></li>" +
+			"<li><span>Volume</span><strong>" + volumePct + "%</strong></li>" +
 			"</ul>" +
 			listHtml;
+	}
+
+	// Quando o carregamento chega perto do fim, some com a música aos
+	// poucos em vez de cortar ela seca quando o GMod fecha essa tela.
+	var musicFadeStarted = false;
+	var musicFadeTimer = null;
+	function fadeOutMusic() {
+		if (musicFadeStarted || !musicState.audio) return;
+		musicFadeStarted = true;
+
+		var startVolume = musicState.audio.volume;
+		var steps = 20;
+		var stepMs = 120; // ~2.4s no total
+		var stepAmount = startVolume / steps;
+
+		musicFadeTimer = setInterval(function () {
+			var next = musicState.audio.volume - stepAmount;
+			if (next <= 0) {
+				musicState.audio.volume = 0;
+				musicState.audio.pause();
+				clearInterval(musicFadeTimer);
+				return;
+			}
+			musicState.audio.volume = next;
+		}, stepMs);
 	}
 
 	/* ---------- utilitário ---------- */
@@ -413,6 +438,7 @@
 		var pct = Math.max(0, Math.min(100, (downloaded / state.filesTotal) * 100));
 		el.progressBar.style.width = pct.toFixed(1) + "%";
 		el.progressLabel.textContent = downloaded + " / " + state.filesTotal + " arquivos";
+		if (pct >= 100) fadeOutMusic();
 	}
 
 	/* ---------- boot ---------- */

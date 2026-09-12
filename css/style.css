@@ -109,6 +109,39 @@ html, body {
 		linear-gradient(180deg, rgba(10,4,20,0.65) 0%, rgba(20,8,40,0.1) 30%, rgba(10,4,20,0.7) 100%);
 }
 
+/* ---------- enfeites animados nos cantos ---------- */
+/* Só nos cantos de cima de propósito: os de baixo são onde o próprio GMod
+   desenha a caixinha nativa de status/"Cancelar" (canto inferior direito) e
+   às vezes um texto de status (canto inferior esquerdo) — colocar animação
+   ali brigaria com isso. Usa só transform+opacity (nada de filter nem
+   mix-blend-mode), que é o que realmente funciona no Chromium do GMod. */
+.corner-deco {
+	position: absolute;
+	z-index: 5;
+	width: 16px;
+	height: 16px;
+	clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+	pointer-events: none;
+	animation: cracker-pulse 2.4s ease-in-out infinite;
+}
+.corner-deco--tl {
+	top: 10px;
+	left: 10px;
+	background: #e838ff;
+	box-shadow: 0 0 10px 2px #e838ff;
+}
+.corner-deco--tr {
+	top: 10px;
+	right: 10px;
+	background: #3fd0ff;
+	box-shadow: 0 0 10px 2px #3fd0ff;
+	animation-delay: 1.2s;
+}
+@keyframes cracker-pulse {
+	0%, 100% { transform: scale(0.7); opacity: 0.45; }
+	50% { transform: scale(1.15); opacity: 1; }
+}
+
 /* ---------- utilitário: moldura com cantos cortados em pixel ---------- */
 .pixel-frame {
 	--pf-cut: var(--pixel);
@@ -219,14 +252,24 @@ html, body {
 	box-shadow:
 		inset 2px 2px 0 rgba(255,255,255,0.08),
 		inset -3px -3px 0 rgba(0,0,0,0.5);
-	padding: 14px 16px 16px;
+	padding: 12px 14px 14px;
 	/* o mouse fica desativado na tela de carregamento do GMod, então
 	   "rolar" pra ver o que passou da altura é impossível lá dentro — por
 	   isso a altura é generosa, pra tentar caber tudo sem precisar de
 	   scroll. overflow:auto continua só como rede de segurança. */
-	max-height: 230px;
+	max-height: 300px;
 	overflow-y: auto;
 }
+
+/* cada quadro com sua própria cor de destaque (reaproveita as mesmas
+   variáveis --accent/--panel-border/--panel-edge que todo o resto do CSS
+   já usa, então título, borda, sombra e valores em destaque mudam juntos
+   sem precisar duplicar regra nenhuma). */
+#panel-curiosidades { --accent: #e838ff; --panel-border: #e838ff; --panel-edge: #9b1fb0; }
+#panel-fanarts       { --accent: #ff3fa6; --panel-border: #ff3fa6; --panel-edge: #b82d78; }
+#panel-perfil         { --accent: #a900ff; --panel-border: #a900ff; --panel-edge: #7300b0; }
+#panel-servidor       { --accent: #7c5cff; --panel-border: #7c5cff; --panel-edge: #4f34c7; }
+#panel-musica         { --accent: #3fd0ff; --panel-border: #3fd0ff; --panel-edge: #1a8fb8; }
 .panel-card h3 {
 	margin: 0 0 10px;
 	font-size: 11px;
@@ -338,11 +381,15 @@ html, body {
 .kv-list li {
 	display: flex;
 	justify-content: space-between;
-	font-size: 15px;
+	gap: 8px;
+	font-size: 13.5px;
+	line-height: 1.3;
 	background: var(--panel-deep);
 	border: 2px solid var(--panel-edge);
-	padding: 6px 8px;
+	padding: 5px 7px;
 }
+.kv-list li span:first-child { flex-shrink: 0; }
+.kv-list li strong { text-align: right; }
 .kv-list time { color: var(--text-dim); font-size: 13px; }
 .kv-list li strong { color: var(--accent); }
 .kv-list li span:first-child { color: var(--text-dim); }
