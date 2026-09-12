@@ -203,13 +203,13 @@ html, body {
 /* ---------- painéis (todos visíveis ao mesmo tempo, em grade) ---------- */
 /* O GMod desativa o mouse na tela de carregamento, então abas clicáveis não
    funcionam de jeito nenhum aqui dentro — em vez de esconder conteúdo atrás
-   de cliques que nunca vão acontecer, mostramos as 4 seções juntas. */
+   de cliques que nunca vão acontecer, mostramos as 5 seções juntas. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
-	width: min(780px, 94vw);
+	width: min(980px, 94vw);
 	display: grid;
-	grid-template-columns: 1fr 1fr;
+	grid-template-columns: repeat(3, 1fr);
 	gap: 14px;
 }
 .panel-card {
@@ -224,7 +224,7 @@ html, body {
 	   "rolar" pra ver o que passou da altura é impossível lá dentro — por
 	   isso a altura é generosa, pra tentar caber tudo sem precisar de
 	   scroll. overflow:auto continua só como rede de segurança. */
-	max-height: 260px;
+	max-height: 230px;
 	overflow-y: auto;
 }
 .panel-card h3 {

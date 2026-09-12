@@ -25,6 +25,7 @@
 		el.fanartGrid = document.getElementById("fanart-grid");
 		el.profileBody = document.getElementById("profile-body");
 		el.serverInfoBody = document.getElementById("server-info-body");
+		el.musicBody = document.getElementById("music-body");
 		el.bgLayers = document.getElementById("bg-layers");
 	}
 
@@ -306,6 +307,65 @@
 		renderServerPanel();
 	}
 
+	/* ---------- painel "Música" ---------- */
+	// Toca sozinha, sem precisar de clique nenhum (mouse desativado na tela
+	// de carregamento) — e passa pra próxima faixa da lista quando uma
+	// termina, em loop. Volume baixo de propósito (config: music.volume),
+	// só ambiente.
+	var musicState = { audio: null, index: 0, tracks: [] };
+
+	function setupMusic() {
+		var music = CFG.music || {};
+		musicState.tracks = music.tracks || [];
+		if (!musicState.tracks.length) {
+			el.musicBody.innerHTML = "<p class='empty-msg'>Nenhuma música cadastrada ainda.</p>";
+			return;
+		}
+
+		musicState.audio = new Audio();
+		musicState.audio.volume = typeof music.volume === "number" ? music.volume : 0.15;
+		musicState.audio.addEventListener("ended", playNextTrack);
+		musicState.audio.addEventListener("error", playNextTrack);
+
+		playTrack(0);
+	}
+
+	function playTrack(index) {
+		musicState.index = index % musicState.tracks.length;
+		var track = musicState.tracks[musicState.index];
+		musicState.audio.src = track.file;
+		// autoplay com som pode ser bloqueado em navegador comum fora do
+		// GMod — dentro do jogo funciona normalmente. Se falhar, não trava
+		// nada, só não toca.
+		musicState.audio.play().catch(function () {});
+		renderMusicPanel();
+	}
+
+	function playNextTrack() {
+		playTrack(musicState.index + 1);
+	}
+
+	function renderMusicPanel() {
+		var volumePct = Math.round((musicState.audio.volume || 0) * 100);
+		var track = musicState.tracks[musicState.index];
+
+		var listHtml = "<h4>Playlist</h4><ul class='kv-list'>" +
+			musicState.tracks
+				.map(function (t, i) {
+					var marker = i === musicState.index ? "▶ " : "";
+					return "<li><span>" + marker + escapeHtml(t.title) + "</span><strong>" + escapeHtml(t.artist || "") + "</strong></li>";
+				})
+				.join("") +
+			"</ul>";
+
+		el.musicBody.innerHTML =
+			"<ul class='kv-list'>" +
+			"<li><span>Tocando agora</span><strong>" + escapeHtml(track.title) + "</strong></li>" +
+			"<li><span>Volume</span><strong>" + volumePct + "% (ambiente)</strong></li>" +
+			"</ul>" +
+			listHtml;
+	}
+
 	/* ---------- utilitário ---------- */
 	function escapeHtml(str) {
 		return String(str).replace(/[&<>"']/g, function (c) {
@@ -374,6 +434,7 @@
 		setupProfile();
 		renderServerBasic(state.serverName, "", "", "");
 		setupServerStats();
+		setupMusic();
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {

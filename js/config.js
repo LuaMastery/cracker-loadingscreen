@@ -65,4 +65,25 @@ window.CRACKER_CONFIG = {
 			author: "Muguetos",
 		},
 	],
+
+	// Música tocando de fundo na tela de carregamento. Toca sozinha (sem
+	// precisar de clique, já que o mouse não funciona aqui) e passa pra
+	// próxima da lista quando uma termina.
+	// volume vai de 0 (mudo) a 1 (máximo) — 0.15 é baixinho de propósito,
+	// só ambiente, pra dar pra conversar/jogar sem a música atrapalhar.
+	music: {
+		volume: 0.15,
+		tracks: [
+			{
+				file: "audio/track-01-to-damn-all.mp3",
+				title: "To Damn All of the Things I Cannot Do",
+				artist: "Zephaniah",
+			},
+			{
+				file: "audio/track-02-torva.mp3",
+				title: "Torva",
+				artist: "Reece Moseley",
+			},
+		],
+	},
 };
