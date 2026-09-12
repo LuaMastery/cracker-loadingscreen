@@ -73,6 +73,21 @@ window.CRACKER_CONFIG = {
 	// só ambiente, pra dar pra conversar/jogar sem a música atrapalhar.
 	music: {
 		volume: 0.15,
+
+		// O GMod não avisa a tela de carregamento quando o jogador termina
+		// de entrar de verdade (spawna e pode se mover) — só sabemos quando
+		// os ARQUIVOS terminam de baixar, o que acontece bem antes disso
+		// (o Lua dos addons ainda inicializa depois). Por isso o fade usa
+		// uma espera: conta esse tempo A PARTIR de quando os arquivos
+		// terminam, e só DEPOIS disso começa a abaixar o volume aos poucos.
+		//
+		// Ajuste esses dois valores testando no seu servidor de verdade:
+		// se a música ainda estiver tocando depois que você já conseguir
+		// se mover, diminua o fadeDelayMs; se ela ainda cortar cedo demais
+		// (com a tela de carregamento ainda na tela), aumente.
+		fadeDelayMs: 15000,    // espera depois dos arquivos 100% (15s)
+		fadeDurationMs: 6000,  // tempo pra ir sumindo de vez (6s)
+
 		tracks: [
 			{
 				file: "audio/track-01-to-damn-all.mp3",

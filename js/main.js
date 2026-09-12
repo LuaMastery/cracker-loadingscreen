@@ -366,17 +366,32 @@
 			listHtml;
 	}
 
-	// Quando o carregamento chega perto do fim, some com a música aos
-	// poucos em vez de cortar ela seca quando o GMod fecha essa tela.
-	var musicFadeStarted = false;
+	// O GMod não avisa quando o jogador termina de entrar de verdade (spawna
+	// e pode se mover) — só sabemos quando os ARQUIVOS terminam de baixar,
+	// o que acontece bem ANTES disso (o Lua dos addons ainda inicializa
+	// depois, geralmente uns 10-20s a mais em servidores com bastante
+	// addon). Por isso: quando os arquivos chegam a 100%, espera-se
+	// `fadeDelayMs` (config) antes de começar a abaixar o volume, em vez
+	// de cortar a música ali na hora.
+	var musicFadeScheduled = false;
 	var musicFadeTimer = null;
-	function fadeOutMusic() {
-		if (musicFadeStarted || !musicState.audio) return;
-		musicFadeStarted = true;
+	function scheduleMusicFadeOut() {
+		if (musicFadeScheduled || !musicState.audio) return;
+		musicFadeScheduled = true;
 
+		var music = CFG.music || {};
+		var delayMs = typeof music.fadeDelayMs === "number" ? music.fadeDelayMs : 15000;
+		setTimeout(fadeOutMusic, delayMs);
+	}
+
+	function fadeOutMusic() {
+		if (!musicState.audio) return;
+
+		var music = CFG.music || {};
+		var durationMs = typeof music.fadeDurationMs === "number" ? music.fadeDurationMs : 6000;
+		var stepMs = 120;
+		var steps = Math.max(1, Math.round(durationMs / stepMs));
 		var startVolume = musicState.audio.volume;
-		var steps = 20;
-		var stepMs = 120; // ~2.4s no total
 		var stepAmount = startVolume / steps;
 
 		musicFadeTimer = setInterval(function () {
@@ -438,7 +453,7 @@
 		var pct = Math.max(0, Math.min(100, (downloaded / state.filesTotal) * 100));
 		el.progressBar.style.width = pct.toFixed(1) + "%";
 		el.progressLabel.textContent = downloaded + " / " + state.filesTotal + " arquivos";
-		if (pct >= 100) fadeOutMusic();
+		if (pct >= 100) scheduleMusicFadeOut();
 	}
 
 	/* ---------- boot ---------- */
