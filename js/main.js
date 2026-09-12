@@ -190,16 +190,26 @@
 	}
 
 	/* ---------- abas ---------- */
+	// O GMod desativa o mouse na tela de carregamento (SetMouseInputEnabled(false)
+	// no próprio loading.lua do jogo), então cliques nunca chegam até aqui dentro
+	// do jogo. Por isso as abas trocam sozinhas — o clique continua funcionando
+	// só pra quem estiver testando isso direto no navegador.
+	function activateTab(index) {
+		el.tabButtons.forEach(function (b, i) { b.classList.toggle("active", i === index); });
+		el.tabPanels.forEach(function (p, i) { p.classList.toggle("active", i === index); });
+	}
 	function setupTabs() {
-		el.tabButtons.forEach(function (btn) {
-			btn.addEventListener("click", function () {
-				var target = btn.getAttribute("data-tab");
-				el.tabButtons.forEach(function (b) { b.classList.toggle("active", b === btn); });
-				el.tabPanels.forEach(function (p) {
-					p.classList.toggle("active", p.id === "panel-" + target);
-				});
-			});
+		el.tabButtons.forEach(function (btn, index) {
+			btn.addEventListener("click", function () { activateTab(index); });
 		});
+
+		if (el.tabButtons.length > 1) {
+			var tabIndex = 0;
+			setInterval(function () {
+				tabIndex = (tabIndex + 1) % el.tabButtons.length;
+				activateTab(tabIndex);
+			}, CFG.tabIntervalMs || 8000);
+		}
 	}
 
 	/* ---------- utilitário ---------- */

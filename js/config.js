@@ -45,6 +45,11 @@ window.CRACKER_CONFIG = {
 	// Tempo entre troca automática de curiosidades (ms).
 	curiosityIntervalMs: 9000,
 
+	// Tempo entre troca automática das ABAS (Curiosidades/Fanarts/Meu Perfil).
+	// O GMod desativa o clique do mouse na tela de carregamento, então as
+	// abas precisam trocar sozinhas pra o jogador ver todo o conteúdo.
+	tabIntervalMs: 8000,
+
 	// Curiosidades / fatos sobre o servidor exibidos na aba "Curiosidades".
 	// Troque pelos fatos reais do Cracker Games BR.
 	curiosities: [
