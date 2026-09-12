@@ -62,7 +62,7 @@ html, body {
    com o nome/logo desenhados nelas) não recebem o dessature pesado, senão
    o texto delas fica ilegível — só um leve escurecido pra não ofuscar a UI. */
 .bg-layer--branded {
-	filter: brightness(0.75) contrast(1.05);
+	filter: brightness(0.5) contrast(1.0);
 }
 
 /* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
@@ -84,6 +84,9 @@ html, body {
 	inset: 0;
 	z-index: 2;
 	background:
+		/* mancha escura só no canto superior esquerdo, pra apagar qualquer
+		   texto/detalhe do fundo bem atrás da nossa logo/nome do servidor */
+		radial-gradient(ellipse 680px 420px at 0% 0%, rgba(8,3,16,0.96) 0%, rgba(8,3,16,0.7) 50%, rgba(8,3,16,0) 100%),
 		radial-gradient(ellipse at 50% 100%, rgba(10,4,20,0.85) 0%, rgba(30,10,50,0.4) 45%, rgba(10,4,20,0.65) 100%),
 		linear-gradient(180deg, rgba(10,4,20,0.65) 0%, rgba(20,8,40,0.1) 30%, rgba(10,4,20,0.7) 100%);
 }
