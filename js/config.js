@@ -74,19 +74,25 @@ window.CRACKER_CONFIG = {
 	music: {
 		volume: 0.15,
 
-		// O GMod não avisa a tela de carregamento quando o jogador termina
-		// de entrar de verdade (spawna e pode se mover) — só sabemos quando
-		// os ARQUIVOS terminam de baixar, o que acontece bem antes disso
-		// (o Lua dos addons ainda inicializa depois). Por isso o fade usa
-		// uma espera: conta esse tempo A PARTIR de quando os arquivos
-		// terminam, e só DEPOIS disso começa a abaixar o volume aos poucos.
+		// Toca as músicas em ordem embaralhada (sorteio), não sempre na
+		// mesma ordem da lista abaixo.
+		shuffle: true,
+
+		// A música para sozinha assim que a página detecta que está sendo
+		// fechada (evento "pagehide"/"unload" do navegador) — isso acontece
+		// exatamente quando o GMod remove essa tela pra mostrar o jogo de
+		// verdade, então é o sinal mais correto que existe. Cortar ali é
+		// esperado: como a troca de tela acontece no mesmíssimo instante,
+		// não dá pra perceber como um corte seco.
 		//
-		// Ajuste esses dois valores testando no seu servidor de verdade:
-		// se a música ainda estiver tocando depois que você já conseguir
-		// se mover, diminua o fadeDelayMs; se ela ainda cortar cedo demais
-		// (com a tela de carregamento ainda na tela), aumente.
-		fadeDelayMs: 15000,    // espera depois dos arquivos 100% (15s)
-		fadeDurationMs: 6000,  // tempo pra ir sumindo de vez (6s)
+		// fadeDelayMs/fadeDurationMs abaixo são só uma REDE DE SEGURANÇA
+		// (bem mais longa, de propósito) pro caso raro do evento de
+		// fechamento não disparar — não deve ser o que normalmente corta a
+		// música. Se mesmo assim a música ainda cortar cedo demais (com a
+		// tela de carregamento ainda visível), me avisa, porque nesse caso
+		// o problema é outro, não é tempo.
+		fadeDelayMs: 60000,
+		fadeDurationMs: 4000,
 
 		tracks: [
 			{
@@ -98,6 +104,11 @@ window.CRACKER_CONFIG = {
 				file: "audio/track-02-torva.mp3",
 				title: "Torva",
 				artist: "Reece Moseley",
+			},
+			{
+				file: "audio/track-03-solitude.mp3",
+				title: "Solitude",
+				artist: "Anthony Septim",
 			},
 		],
 	},

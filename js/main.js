@@ -309,14 +309,15 @@
 
 	/* ---------- painel "Música" ---------- */
 	// Toca sozinha, sem precisar de clique nenhum (mouse desativado na tela
-	// de carregamento) — e passa pra próxima faixa da lista quando uma
-	// termina, em loop. Volume baixo de propósito (config: music.volume),
-	// só ambiente.
+	// de carregamento) — e sorteia a próxima faixa quando uma termina (sem
+	// repetir a mesma duas vezes seguidas), em loop. Volume baixo de
+	// propósito (config: music.volume), só ambiente.
 	var musicState = { audio: null, index: 0, tracks: [] };
 
 	function setupMusic() {
 		var music = CFG.music || {};
 		musicState.tracks = music.tracks || [];
+		musicState.shuffle = music.shuffle !== false; // liga por padrão
 		if (!musicState.tracks.length) {
 			el.musicBody.innerHTML = "<p class='empty-msg'>Nenhuma música cadastrada ainda.</p>";
 			return;
@@ -327,7 +328,16 @@
 		musicState.audio.addEventListener("ended", playNextTrack);
 		musicState.audio.addEventListener("error", playNextTrack);
 
-		playTrack(0);
+		var firstIndex = musicState.shuffle
+			? Math.floor(Math.random() * musicState.tracks.length)
+			: 0;
+		playTrack(firstIndex);
+
+		// Corta a música assim que o navegador avisa que a página está
+		// sendo fechada/destruída — no GMod, isso acontece exatamente
+		// quando essa tela de carregamento é removida pra mostrar o jogo.
+		window.addEventListener("pagehide", stopMusicNow);
+		window.addEventListener("unload", stopMusicNow);
 	}
 
 	function playTrack(index) {
@@ -342,7 +352,22 @@
 	}
 
 	function playNextTrack() {
-		playTrack(musicState.index + 1);
+		var next;
+		if (musicState.shuffle && musicState.tracks.length > 1) {
+			// sorteia, mas nunca repete a mesma faixa duas vezes seguidas
+			do {
+				next = Math.floor(Math.random() * musicState.tracks.length);
+			} while (next === musicState.index);
+		} else {
+			next = musicState.index + 1;
+		}
+		playTrack(next);
+	}
+
+	function stopMusicNow() {
+		if (musicFadeTimer) clearInterval(musicFadeTimer);
+		if (!musicState.audio) return;
+		musicState.audio.pause();
 	}
 
 	function renderMusicPanel() {
@@ -366,13 +391,12 @@
 			listHtml;
 	}
 
-	// O GMod não avisa quando o jogador termina de entrar de verdade (spawna
-	// e pode se mover) — só sabemos quando os ARQUIVOS terminam de baixar,
-	// o que acontece bem ANTES disso (o Lua dos addons ainda inicializa
-	// depois, geralmente uns 10-20s a mais em servidores com bastante
-	// addon). Por isso: quando os arquivos chegam a 100%, espera-se
-	// `fadeDelayMs` (config) antes de começar a abaixar o volume, em vez
-	// de cortar a música ali na hora.
+	// REDE DE SEGURANÇA apenas — quem normalmente corta a música é o
+	// listener de "pagehide"/"unload" lá em cima (dispara exatamente quando
+	// o GMod fecha essa tela). Isso aqui só existe pro caso raro desse
+	// evento não disparar; por isso o delay padrão é bem mais longo
+	// (fadeDelayMs no config.js), pra não cortar a música cedo demais com
+	// a tela de carregamento ainda visível.
 	var musicFadeScheduled = false;
 	var musicFadeTimer = null;
 	function scheduleMusicFadeOut() {
