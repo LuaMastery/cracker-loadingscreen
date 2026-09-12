@@ -112,4 +112,13 @@ window.CRACKER_CONFIG = {
 			},
 		],
 	},
+
+	// Quem participou do desenvolvimento da Cracker Games BR, mostrado no
+	// quadro "Créditos".
+	credits: [
+		{ name: "Muguet", role: "Artista" },
+		{ name: "Arthur", role: "Gerenciador de Servidores" },
+		{ name: "CaioMarquezine", role: "Centro de Administração e Monitoramento" },
+		{ name: "Nico", role: "Representante autorizado" },
+	],
 };

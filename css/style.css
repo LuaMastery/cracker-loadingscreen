@@ -236,7 +236,7 @@ html, body {
 /* ---------- painéis (todos visíveis ao mesmo tempo, em grade) ---------- */
 /* O GMod desativa o mouse na tela de carregamento, então abas clicáveis não
    funcionam de jeito nenhum aqui dentro — em vez de esconder conteúdo atrás
-   de cliques que nunca vão acontecer, mostramos as 5 seções juntas. */
+   de cliques que nunca vão acontecer, mostramos todas as seções juntas. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
@@ -269,7 +269,9 @@ html, body {
 #panel-fanarts       { --accent: #ff3fa6; --panel-border: #ff3fa6; --panel-edge: #b82d78; }
 #panel-perfil         { --accent: #a900ff; --panel-border: #a900ff; --panel-edge: #7300b0; }
 #panel-servidor       { --accent: #7c5cff; --panel-border: #7c5cff; --panel-edge: #4f34c7; }
+#panel-clima          { --accent: #3fffb0; --panel-border: #3fffb0; --panel-edge: #1fa87a; }
 #panel-musica         { --accent: #3fd0ff; --panel-border: #3fd0ff; --panel-edge: #1a8fb8; }
+#panel-creditos       { --accent: #ffd23f; --panel-border: #ffd23f; --panel-edge: #b8931f; }
 .panel-card h3 {
 	margin: 0 0 10px;
 	font-size: 11px;
@@ -428,6 +430,15 @@ html, body {
 	margin-top: 8px;
 	font-size: 15px;
 	color: var(--text-dim);
+}
+
+/* mensagem de tempo estimado até entrar no servidor de verdade (fica
+   embaixo da barra, não é uma aba — é sempre visível, já que é curtinha) */
+.eta-text {
+	margin-top: 6px;
+	font-size: 14px;
+	color: var(--accent);
+	text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
 }
 
 /* ---------- responsivo (telas pequenas / 4:3) ---------- */

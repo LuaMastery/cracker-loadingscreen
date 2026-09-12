@@ -25,7 +25,10 @@
 		el.fanartGrid = document.getElementById("fanart-grid");
 		el.profileBody = document.getElementById("profile-body");
 		el.serverInfoBody = document.getElementById("server-info-body");
+		el.climaBody = document.getElementById("clima-body");
 		el.musicBody = document.getElementById("music-body");
+		el.creditsBody = document.getElementById("credits-body");
+		el.etaText = document.getElementById("eta-text");
 		el.bgLayers = document.getElementById("bg-layers");
 	}
 
@@ -307,6 +310,117 @@
 		renderServerPanel();
 	}
 
+	/* ---------- painel "Clima & Horário" ---------- */
+	// Não existe permissão de localização de verdade aqui dentro (o mouse
+	// fica desativado, então nem dá pra clicar em "permitir" um popup do
+	// navegador) — por isso a cidade vem por IP (ipapi.co), sem precisar de
+	// nenhum clique. O clima vem do Open-Meteo (também sem chave de API).
+	// Se qualquer uma das duas falhar, o relógio continua funcionando
+	// normalmente (usa o horário do próprio PC como reserva), já que ele não
+	// depende de internet nenhuma.
+	var climaState = { timezone: null, place: "", weatherDesc: null, tempC: null, timeStr: "", note: "" };
+
+	function setupClima() {
+		updateClock();
+		setInterval(updateClock, 1000);
+
+		fetch("https://ipapi.co/json/", { cache: "no-store" })
+			.then(function (res) {
+				if (!res.ok) throw new Error("HTTP " + res.status);
+				return res.json();
+			})
+			.then(function (geo) {
+				climaState.timezone = geo.timezone || null;
+				climaState.place = [geo.city, geo.region].filter(Boolean).join(", ") || geo.country_name || "";
+				updateClock();
+				if (geo.latitude && geo.longitude) fetchWeather(geo.latitude, geo.longitude);
+			})
+			.catch(function () {
+				climaState.note = "Não foi possível descobrir sua localização agora.";
+				renderClima();
+			});
+	}
+
+	function fetchWeather(lat, lon) {
+		var url =
+			"https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
+			"&current=temperature_2m,weather_code&timezone=auto";
+		fetch(url, { cache: "no-store" })
+			.then(function (res) {
+				if (!res.ok) throw new Error("HTTP " + res.status);
+				return res.json();
+			})
+			.then(function (data) {
+				var current = data.current || {};
+				climaState.tempC = typeof current.temperature_2m === "number" ? current.temperature_2m : null;
+				climaState.weatherDesc = weatherCodeToText(current.weather_code);
+				renderClima();
+			})
+			.catch(function () {
+				renderClima();
+			});
+	}
+
+	function weatherCodeToText(code) {
+		var map = {
+			0: "Céu limpo", 1: "Poucas nuvens", 2: "Parcialmente nublado", 3: "Nublado",
+			45: "Neblina", 48: "Neblina com geada",
+			51: "Garoa fraca", 53: "Garoa", 55: "Garoa forte",
+			56: "Garoa congelante", 57: "Garoa congelante forte",
+			61: "Chuva fraca", 63: "Chuva", 65: "Chuva forte",
+			66: "Chuva congelante", 67: "Chuva congelante forte",
+			71: "Neve fraca", 73: "Neve", 75: "Neve forte", 77: "Grãos de neve",
+			80: "Pancadas de chuva fracas", 81: "Pancadas de chuva", 82: "Pancadas de chuva fortes",
+			85: "Pancadas de neve fracas", 86: "Pancadas de neve fortes",
+			95: "Tempestade", 96: "Tempestade com granizo", 99: "Tempestade com granizo forte",
+		};
+		return map[code] || null;
+	}
+
+	function updateClock() {
+		var opts = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
+		if (climaState.timezone) opts.timeZone = climaState.timezone;
+		try {
+			climaState.timeStr = new Intl.DateTimeFormat("pt-BR", opts).format(new Date());
+		} catch (e) {
+			// timezone inválida/desconhecida: cai pro horário local do PC.
+			climaState.timeStr = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date());
+		}
+		renderClima();
+	}
+
+	function renderClima() {
+		var rows = "";
+		if (climaState.place) {
+			rows += "<li><span>Local</span><strong>" + escapeHtml(climaState.place) + "</strong></li>";
+		}
+		if (climaState.weatherDesc) {
+			var tempStr = typeof climaState.tempC === "number" ? climaState.tempC.toFixed(0) + "°C" : "";
+			rows += "<li><span>Clima</span><strong>" + escapeHtml(climaState.weatherDesc) + (tempStr ? " · " + tempStr : "") + "</strong></li>";
+		}
+		rows += "<li><span>Horário</span><strong>" + escapeHtml(climaState.timeStr || "--:--:--") + "</strong></li>";
+		el.climaBody.innerHTML =
+			"<ul class='kv-list'>" + rows + "</ul>" +
+			(climaState.note ? "<p class='empty-msg'>" + escapeHtml(climaState.note) + "</p>" : "");
+	}
+
+	/* ---------- painel "Créditos" ---------- */
+	function setupCreditos() {
+		var list = CFG.credits || [];
+		if (!list.length) {
+			el.creditsBody.innerHTML = "<p class='empty-msg'>Créditos ainda não cadastrados.</p>";
+			return;
+		}
+		el.creditsBody.innerHTML =
+			"<ul class='kv-list'>" +
+			list
+				.map(function (c) {
+					return "<li><span>" + escapeHtml(c.name) + "</span><strong>" + escapeHtml(c.role) + "</strong></li>";
+				})
+				.join("") +
+			"</ul>";
+	}
+
 	/* ---------- painel "Música" ---------- */
 	// Toca sozinha, sem precisar de clique nenhum (mouse desativado na tela
 	// de carregamento) — e sorteia a próxima faixa quando uma termina (sem
@@ -477,7 +591,47 @@
 		var pct = Math.max(0, Math.min(100, (downloaded / state.filesTotal) * 100));
 		el.progressBar.style.width = pct.toFixed(1) + "%";
 		el.progressLabel.textContent = downloaded + " / " + state.filesTotal + " arquivos";
+		updateEta(pct);
 		if (pct >= 100) scheduleMusicFadeOut();
+	}
+
+	/* ---------- mensagem "tempo estimado pra entrar" (não é aba) ---------- */
+	// Não existe nenhum aviso real de "terminou de baixar" nem de "o jogador
+	// já consegue se mexer" — o jeito mais honesto de estimar é medir a
+	// própria velocidade de download que está rolando agora (quantos
+	// arquivos sumiram da fila / quanto tempo passou) e projetar quanto
+	// falta. Por isso o texto é sempre aproximado ("~").
+	var etaSamples = [];
+	function updateEta(pct) {
+		if (!el.etaText) return;
+		var now = Date.now();
+		etaSamples.push({ time: now, needed: state.filesNeeded });
+		if (etaSamples.length > 8) etaSamples.shift();
+
+		if (pct >= 100) {
+			el.etaText.textContent = "Quase lá — entrando no servidor...";
+			return;
+		}
+
+		var first = etaSamples[0];
+		var elapsedSec = (now - first.time) / 1000;
+		var filesDownloadedInWindow = first.needed - state.filesNeeded;
+		if (etaSamples.length < 2 || elapsedSec < 1 || filesDownloadedInWindow <= 0) {
+			el.etaText.textContent = "Calculando tempo estimado...";
+			return;
+		}
+
+		var rate = filesDownloadedInWindow / elapsedSec; // arquivos por segundo
+		var etaSec = Math.ceil(state.filesNeeded / rate);
+		el.etaText.textContent = "Tempo estimado para entrar: ~" + formatEta(etaSec);
+	}
+
+	function formatEta(seconds) {
+		if (seconds < 5) return "poucos segundos";
+		if (seconds < 60) return seconds + "s";
+		var min = Math.floor(seconds / 60);
+		var sec = seconds % 60;
+		return min + "min" + (sec > 0 ? " " + sec + "s" : "");
 	}
 
 	/* ---------- boot ---------- */
@@ -499,7 +653,9 @@
 		setupProfile();
 		renderServerBasic(state.serverName, "", "", "");
 		setupServerStats();
+		setupClima();
 		setupMusic();
+		setupCreditos();
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {
