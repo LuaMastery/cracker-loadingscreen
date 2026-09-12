@@ -54,24 +54,42 @@ html, body {
 	background-position: center;
 	opacity: 0;
 	transition: opacity 1.6s ease;
+	/* o filter (brightness/saturate/contrast) fica só de bônus pra quem
+	   testar isso num navegador normal — dentro do GMod ele NÃO faz nada,
+	   porque o Chromium ali roda em modo "renderização fora da tela"
+	   (pra virar textura 3D) e esse modo não aplica CSS filter. Por isso
+	   quem realmente escurece é a camada sólida .bg-dim logo abaixo,
+	   que é só transparência básica (isso sim funciona em qualquer modo). */
 	filter: grayscale(0.55) brightness(0.6) contrast(1.1);
 }
 .bg-layer.active { opacity: 1; }
 
-/* artes já feitas na cor certa pra Cracker Games BR (ex: peças do Muguetos
-   com o nome/logo desenhados nelas) não recebem o dessature pesado, senão
-   o texto delas fica ilegível — só um leve escurecido pra não ofuscar a UI. */
 .bg-layer--branded {
 	filter: saturate(0.55) brightness(0.35) contrast(0.95);
 }
 
-/* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
-   sem depender das cores originais (hue-rotate reagia diferente em cada
-   screenshot). mix-blend-mode "hue" pinta a tonalidade mantendo o brilho. */
-.bg-tint {
+/* escurecida garantida (transparência simples, funciona em qualquer modo
+   do Chromium, ao contrário do filter). Sozinha já deixa a arte bem mais
+   discreta; some de vez quando alguém testar isso fora do GMod se quiser
+   ver a arte "crua" — não é o caso aqui, então fica sempre ativa. */
+.bg-dim {
 	position: absolute;
 	inset: 0;
 	z-index: 1;
+	background: rgba(6, 2, 14, 0.62);
+}
+
+/* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
+   sem depender das cores originais (hue-rotate reagia diferente em cada
+   screenshot). mix-blend-mode "hue" pinta a tonalidade mantendo o brilho.
+   Igual o filter, mix-blend-mode também depende de aceleração de GPU que
+   o modo "fora da tela" do GMod pode não dar — por isso é só bônus aqui
+   também, o .bg-dim acima é quem garante o visual escurecido de qualquer
+   forma. */
+.bg-tint {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
 	background: linear-gradient(135deg, #a900ff 0%, #7512ff 55%, #dd00ff 100%);
 	mix-blend-mode: hue;
 	opacity: 0.9;
@@ -82,7 +100,7 @@ html, body {
 .bg-overlay {
 	position: absolute;
 	inset: 0;
-	z-index: 2;
+	z-index: 3;
 	background:
 		/* mancha escura só no canto superior esquerdo, pra apagar qualquer
 		   texto/detalhe do fundo bem atrás da nossa logo/nome do servidor */
@@ -116,7 +134,7 @@ html, body {
 /* ---------- layout geral ---------- */
 .screen {
 	position: relative;
-	z-index: 3;
+	z-index: 4;
 	display: flex;
 	flex-direction: column;
 	width: 100%;
@@ -255,8 +273,12 @@ html, body {
 }
 .fanart-card img {
 	width: 100%;
-	height: 110px;
-	object-fit: cover;
+	height: 150px;
+	/* contain em vez de cover: a imagem inteira sempre aparece, sem cortar
+	   nenhum pedaço — pode sobrar uma faixa vazia dos lados (mostra a cor
+	   de fundo do card), mas nunca perde parte do desenho. */
+	object-fit: contain;
+	background: var(--bg-dark);
 	display: block;
 	image-rendering: auto;
 }

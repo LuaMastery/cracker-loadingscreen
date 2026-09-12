@@ -121,10 +121,21 @@
 	}
 
 	/* ---------- perfil (aba "Meu Perfil") ---------- */
+	// O SteamID já chega de graça pelo GameDetails do próprio GMod, então
+	// mostramos ele sempre (é informação real, não depende de nenhuma API).
+	// O resto (tempo de jogo, bans, avisos) só aparece quando a API estiver
+	// configurada — mas em vez de esconder tudo atrás de um aviso genérico,
+	// deixamos o que já é real visível o tempo todo.
+	function renderSteamIdRow() {
+		if (!state.steamId) return "";
+		return "<ul class='kv-list'><li><span>SteamID</span><strong>" + escapeHtml(state.steamId) + "</strong></li></ul>";
+	}
+
 	function setupProfile() {
 		if (!CFG.apiBaseUrl) {
 			el.profileBody.innerHTML =
-				'<p class="empty-msg">A integração com o perfil ainda não foi configurada neste servidor.</p>';
+				renderSteamIdRow() +
+				"<p class='empty-msg'>Tempo de jogo, bans e avisos ainda não foram configurados neste servidor.</p>";
 			return;
 		}
 		if (!state.steamId) {
@@ -132,11 +143,12 @@
 				'<p class="empty-msg">Aguardando o jogo enviar seu SteamID...</p>';
 			return;
 		}
+		el.profileBody.innerHTML = renderSteamIdRow();
 		fetchProfile(state.steamId);
 	}
 
 	function fetchProfile(steamId) {
-		el.profileBody.innerHTML = '<p class="empty-msg">Carregando seus dados...</p>';
+		el.profileBody.innerHTML = renderSteamIdRow() + '<p class="empty-msg">Carregando seus dados...</p>';
 		var url = CFG.apiBaseUrl.replace(/\/$/, "") + "/profile.php?steamid=" + encodeURIComponent(steamId);
 
 		fetch(url, { cache: "no-store" })
@@ -147,7 +159,8 @@
 			.then(renderProfile)
 			.catch(function (err) {
 				el.profileBody.innerHTML =
-					'<p class="empty-msg">Não foi possível carregar seus dados agora (' +
+					renderSteamIdRow() +
+					'<p class="empty-msg">Não foi possível carregar o resto dos seus dados agora (' +
 					escapeHtml(err.message) +
 					"). Isso não afeta sua entrada no servidor.</p>";
 			});
@@ -184,6 +197,7 @@
 		}
 
 		el.profileBody.innerHTML =
+			renderSteamIdRow() +
 			banHtml +
 			'<div class="profile-stats">' +
 			'<div class="profile-stat"><span class="value">' + playtimeHours + "h</span><span class='label'>tempo de jogo</span></div>" +
