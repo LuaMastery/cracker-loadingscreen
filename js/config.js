@@ -16,10 +16,14 @@ window.CRACKER_CONFIG = {
 	// nome). Deixe "" se não quiser mostrar nenhum crédito.
 	logoCredit: "logo por Muguetos",
 
-	// URL base da API de perfil (api/profile.php). Deixe "" para desativar
-	// a aba "Meu Perfil" (mostra um aviso em vez de tentar buscar dados).
+	// URL base da API (api/profile.php, api/server_stats.php). Deixe "" para
+	// desativar os quadros "Meu Perfil" e o ranking do quadro "Servidor"
+	// (mostra um aviso em vez de tentar buscar dados).
 	// Ex: "https://painel.crackergamesbr.com/api"
 	apiBaseUrl: "",
+
+	// Tempo entre atualizações do ranking ao vivo no quadro "Servidor" (ms).
+	serverStatsIntervalMs: 15000,
 
 	// Galeria de imagens de fundo (troca automática entre elas).
 	// Por enquanto, desativada de propósito: só entra arte feita pelo

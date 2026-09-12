@@ -24,6 +24,7 @@
 		el.curiosityText = document.getElementById("curiosity-text");
 		el.fanartGrid = document.getElementById("fanart-grid");
 		el.profileBody = document.getElementById("profile-body");
+		el.serverInfoBody = document.getElementById("server-info-body");
 		el.bgLayers = document.getElementById("bg-layers");
 	}
 
@@ -59,6 +60,12 @@
 	function updateTint() {
 		var layers = el.bgLayers.children;
 		if (!layers.length) return;
+		// reforço: aplica o mesmo fundo direto no <body> também. Se por
+		// algum motivo os elementos posicionados não renderizarem no
+		// Chromium do GMod, o body sozinho ainda mostra a imagem.
+		document.body.style.backgroundImage = layers[bgIndex].style.backgroundImage;
+		document.body.style.backgroundSize = "cover";
+		document.body.style.backgroundPosition = "center";
 		el.bgTint.classList.toggle("bg-tint--off", layers[bgIndex].dataset.branded === "1");
 	}
 
@@ -164,7 +171,7 @@
 		var warnsHtml = "";
 		if (data.warns && data.warns.length) {
 			warnsHtml =
-				"<h4>Avisos recebidos (" + data.warns.length + ")</h4><ul class='profile-list'>" +
+				"<h4>Avisos recebidos (" + data.warns.length + ")</h4><ul class='kv-list'>" +
 				data.warns
 					.slice(0, 5)
 					.map(function (w) {
@@ -186,6 +193,105 @@
 			warnsHtml;
 	}
 
+	/* ---------- painel "Servidor" ---------- */
+	// Nome/mapa/modo/capacidade chegam de graça pelo GameDetails do próprio
+	// GMod (nenhuma API precisa estar configurada pra ver isso). Já o
+	// ranking de kills/mortes/ping/fps depende da API + do addon Lua
+	// (cracker_server_stats.lua) publicando um "retrato" do servidor de
+	// tempos em tempos — enquanto isso não estiver configurado, mostra um
+	// aviso só nessa parte.
+	var serverPanel = { basicHtml: "", statsHtml: "" };
+
+	function renderServerPanel() {
+		el.serverInfoBody.innerHTML = serverPanel.basicHtml + serverPanel.statsHtml;
+	}
+
+	function renderServerBasic(servername, mapname, gamemode, maxplayers) {
+		serverPanel.basicHtml =
+			"<ul class='kv-list'>" +
+			"<li><span>Servidor</span><strong>" + escapeHtml(servername || "-") + "</strong></li>" +
+			"<li><span>Mapa</span><strong>" + escapeHtml(mapname || "-") + "</strong></li>" +
+			"<li><span>Modo</span><strong>" + escapeHtml(gamemode || "-") + "</strong></li>" +
+			"<li><span>Capacidade</span><strong>" + escapeHtml(String(maxplayers || "-")) + " jogadores</strong></li>" +
+			"</ul>";
+		renderServerPanel();
+	}
+
+	function setupServerStats() {
+		if (!CFG.apiBaseUrl) {
+			serverPanel.statsHtml =
+				"<h4>Ranking ao vivo</h4><p class='empty-msg'>Ainda não configurado neste servidor.</p>";
+			renderServerPanel();
+			return;
+		}
+		fetchServerStats();
+		setInterval(fetchServerStats, CFG.serverStatsIntervalMs || 15000);
+	}
+
+	function fetchServerStats() {
+		var url = CFG.apiBaseUrl.replace(/\/$/, "") + "/server_stats.php";
+		fetch(url, { cache: "no-store" })
+			.then(function (res) {
+				if (!res.ok) throw new Error("HTTP " + res.status);
+				return res.json();
+			})
+			.then(renderServerStats)
+			.catch(function () {
+				serverPanel.statsHtml =
+					"<h4>Ranking ao vivo</h4><p class='empty-msg'>Não foi possível carregar agora.</p>";
+				renderServerPanel();
+			});
+	}
+
+	function renderServerStats(data) {
+		if (!data || !data.players || !data.players.length) {
+			serverPanel.statsHtml =
+				"<h4>Ranking ao vivo</h4><p class='empty-msg'>Nenhum jogador conectado no momento.</p>";
+			renderServerPanel();
+			return;
+		}
+
+		function highlight(label, entry, suffix) {
+			if (!entry) return "";
+			return "<li><span>" + escapeHtml(label) + "</span><strong>" +
+				escapeHtml(entry.name) + " (" + entry.value + (suffix || "") + ")</strong></li>";
+		}
+
+		function extremes(list, key) {
+			var withValue = list.filter(function (p) { return p[key] !== null && p[key] !== undefined; });
+			if (!withValue.length) return { max: null, min: null };
+			var max = withValue[0], min = withValue[0];
+			withValue.forEach(function (p) {
+				if (p[key] > max[key]) max = p;
+				if (p[key] < min[key]) min = p;
+			});
+			return {
+				max: { name: max.name, value: max[key] },
+				min: { name: min.name, value: min[key] },
+			};
+		}
+
+		var kills = extremes(data.players, "kills");
+		var deaths = extremes(data.players, "deaths");
+		var ping = extremes(data.players, "ping");
+		var fps = extremes(data.players, "fps");
+
+		serverPanel.statsHtml =
+			"<h4>Jogadores conectados</h4><p class='curiosity' style='font-size:15px;min-height:auto;'>" +
+			data.players.length + " online</p>" +
+			"<h4>Ranking ao vivo</h4><ul class='kv-list'>" +
+			highlight("Mais kills", kills.max) +
+			highlight("Menos kills", kills.min) +
+			highlight("Mais mortes", deaths.max) +
+			highlight("Menos mortes", deaths.min) +
+			highlight("Maior ping", ping.max, "ms") +
+			highlight("Menor ping", ping.min, "ms") +
+			highlight("Maior FPS", fps.max) +
+			highlight("Menor FPS", fps.min) +
+			"</ul>";
+		renderServerPanel();
+	}
+
 	/* ---------- utilitário ---------- */
 	function escapeHtml(str) {
 		return String(str).replace(/[&<>"']/g, function (c) {
@@ -202,6 +308,7 @@
 		el.serverName.textContent = state.serverName;
 		el.mapName.textContent = state.mapName ? "Mapa: " + state.mapName : "";
 		setupProfile();
+		renderServerBasic(state.serverName, state.mapName, gamemode, maxplayers);
 	};
 
 	window.SetStatusChanged = function (status) {
@@ -251,6 +358,8 @@
 		setupCuriosities();
 		setupFanarts();
 		setupProfile();
+		renderServerBasic(state.serverName, "", "", "");
+		setupServerStats();
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {

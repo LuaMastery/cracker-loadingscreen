@@ -19,6 +19,7 @@
 * { box-sizing: border-box; }
 
 html, body {
+	position: relative;
 	margin: 0;
 	padding: 0;
 	width: 100%;
@@ -36,8 +37,13 @@ html, body {
 }
 
 /* ---------- fundo (fotos reais, galeria) ---------- */
+/* position:absolute em vez de fixed de propósito: o Chromium embutido do
+   GMod (bem mais antigo que um navegador comum) não estava renderizando
+   camadas position:fixed corretamente — a tela ficava toda preta. Como
+   body/html já tem position:relative e ocupa 100% da tela, absolute com
+   inset:0 dá exatamente o mesmo resultado visual e funciona lá dentro. */
 #bg-layers {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	z-index: 0;
 }
@@ -63,7 +69,7 @@ html, body {
    sem depender das cores originais (hue-rotate reagia diferente em cada
    screenshot). mix-blend-mode "hue" pinta a tonalidade mantendo o brilho. */
 .bg-tint {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	z-index: 1;
 	background: linear-gradient(135deg, #a900ff 0%, #7512ff 55%, #dd00ff 100%);
@@ -74,7 +80,7 @@ html, body {
 .bg-tint.bg-tint--off { opacity: 0; }
 
 .bg-overlay {
-	position: fixed;
+	position: absolute;
 	inset: 0;
 	z-index: 2;
 	background:
@@ -173,19 +179,19 @@ html, body {
 	color: var(--accent);
 }
 
-/* ---------- painéis (todos visíveis ao mesmo tempo, lado a lado) ---------- */
+/* ---------- painéis (todos visíveis ao mesmo tempo, em grade) ---------- */
 /* O GMod desativa o mouse na tela de carregamento, então abas clicáveis não
    funcionam de jeito nenhum aqui dentro — em vez de esconder conteúdo atrás
-   de cliques que nunca vão acontecer, mostramos as 3 seções juntas. */
+   de cliques que nunca vão acontecer, mostramos as 4 seções juntas. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
-	width: min(920px, 94vw);
-	display: flex;
+	width: min(780px, 94vw);
+	display: grid;
+	grid-template-columns: 1fr 1fr;
 	gap: 14px;
 }
 .panel-card {
-	flex: 1;
 	min-width: 0;
 	background: var(--panel-bg);
 	border: 3px solid var(--panel-border);
@@ -193,7 +199,11 @@ html, body {
 		inset 2px 2px 0 rgba(255,255,255,0.08),
 		inset -3px -3px 0 rgba(0,0,0,0.5);
 	padding: 14px 16px 16px;
-	max-height: 240px;
+	/* o mouse fica desativado na tela de carregamento do GMod, então
+	   "rolar" pra ver o que passou da altura é impossível lá dentro — por
+	   isso a altura é generosa, pra tentar caber tudo sem precisar de
+	   scroll. overflow:auto continua só como rede de segurança. */
+	max-height: 260px;
 	overflow-y: auto;
 }
 .panel-card h3 {
@@ -204,6 +214,14 @@ html, body {
 	color: var(--accent);
 	text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
 }
+.panel-card h4 {
+	margin: 12px 0 8px;
+	font-size: 11px;
+	color: var(--text-dim);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.panel-card h4:first-child { margin-top: 0; }
 
 /* scrollbar em estilo pixel (webkit / CEF do GMod) */
 .panel-card::-webkit-scrollbar { width: 8px; }
@@ -284,7 +302,7 @@ html, body {
 	color: #ffb3ba;
 }
 .profile-alert strong { font-family: "Press Start 2P", monospace; font-size: 11px; display: block; margin-bottom: 6px; }
-.profile-list {
+.kv-list {
 	list-style: none;
 	margin: 0;
 	padding: 0;
@@ -292,7 +310,7 @@ html, body {
 	flex-direction: column;
 	gap: 6px;
 }
-.profile-list li {
+.kv-list li {
 	display: flex;
 	justify-content: space-between;
 	font-size: 15px;
@@ -300,7 +318,9 @@ html, body {
 	border: 2px solid var(--panel-edge);
 	padding: 6px 8px;
 }
-.profile-list time { color: var(--text-dim); font-size: 13px; }
+.kv-list time { color: var(--text-dim); font-size: 13px; }
+.kv-list li strong { color: var(--accent); }
+.kv-list li span:first-child { color: var(--text-dim); }
 
 .empty-msg { color: var(--text-dim); font-size: 16px; }
 
@@ -341,6 +361,6 @@ html, body {
 /* ---------- responsivo (telas pequenas / 4:3) ---------- */
 @media (max-width: 760px) {
 	.screen { padding: 16px 18px 110px; }
-	.panels { flex-direction: column; width: 100%; }
+	.panels { grid-template-columns: 1fr; width: 100%; }
 	.panel-card { max-height: 130px; }
 }
