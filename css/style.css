@@ -1,0 +1,381 @@
+@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+
+:root {
+	/* paleta extraída da logo oficial (arte do Muguetos) */
+	--accent: #e838ff;
+	--accent-strong: #9b30ff;
+	--accent-deep: #5b1fb8;
+	--bg-dark: #0a0414;
+	--panel-bg: #150a28;
+	--panel-border: #9b30ff;
+	--panel-edge: #5b1fb8;
+	--panel-deep: #0d0620;
+	--text-main: #f5ecff;
+	--text-dim: #b79fdb;
+	--danger: #ff4d6d;
+	--pixel: 6px; /* tamanho do "corte" de pixel usado nos cantos */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: var(--bg-dark);
+	color: var(--text-main);
+	font-family: "VT323", "Courier New", monospace;
+	font-size: 18px;
+	image-rendering: pixelated;
+}
+
+.pixel-font {
+	font-family: "Press Start 2P", monospace;
+}
+
+/* ---------- fundo (fotos reais, galeria) ---------- */
+#bg-layers {
+	position: fixed;
+	inset: 0;
+	z-index: 0;
+}
+.bg-layer {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	opacity: 0;
+	transition: opacity 1.6s ease;
+	filter: grayscale(0.55) brightness(0.6) contrast(1.1);
+}
+.bg-layer.active { opacity: 1; }
+
+/* artes já feitas na cor certa pra Cracker Games BR (ex: peças do Muguetos
+   com o nome/logo desenhados nelas) não recebem o dessature pesado, senão
+   o texto delas fica ilegível — só um leve escurecido pra não ofuscar a UI. */
+.bg-layer--branded {
+	filter: brightness(0.75) contrast(1.05);
+}
+
+/* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
+   sem depender das cores originais (hue-rotate reagia diferente em cada
+   screenshot). mix-blend-mode "hue" pinta a tonalidade mantendo o brilho. */
+.bg-tint {
+	position: fixed;
+	inset: 0;
+	z-index: 1;
+	background: linear-gradient(135deg, #a900ff 0%, #7512ff 55%, #dd00ff 100%);
+	mix-blend-mode: hue;
+	opacity: 0.9;
+	transition: opacity 0.6s ease;
+}
+.bg-tint.bg-tint--off { opacity: 0; }
+
+.bg-overlay {
+	position: fixed;
+	inset: 0;
+	z-index: 2;
+	background:
+		radial-gradient(ellipse at 50% 100%, rgba(10,4,20,0.85) 0%, rgba(30,10,50,0.4) 45%, rgba(10,4,20,0.65) 100%),
+		linear-gradient(180deg, rgba(10,4,20,0.65) 0%, rgba(20,8,40,0.1) 30%, rgba(10,4,20,0.7) 100%);
+}
+
+/* ---------- utilitário: moldura com cantos cortados em pixel ---------- */
+.pixel-frame {
+	--pf-cut: var(--pixel);
+	position: relative;
+	clip-path: polygon(
+		0 var(--pf-cut), var(--pf-cut) var(--pf-cut), var(--pf-cut) 0,
+		calc(100% - var(--pf-cut)) 0, calc(100% - var(--pf-cut)) var(--pf-cut), 100% var(--pf-cut),
+		100% calc(100% - var(--pf-cut)), calc(100% - var(--pf-cut)) calc(100% - var(--pf-cut)), calc(100% - var(--pf-cut)) 100%,
+		var(--pf-cut) 100%, var(--pf-cut) calc(100% - var(--pf-cut)), 0 calc(100% - var(--pf-cut))
+	);
+}
+.pixel-frame::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translate(5px, 5px);
+	background: #000;
+	opacity: 0.55;
+	clip-path: inherit;
+	z-index: -1;
+}
+
+/* ---------- layout geral ---------- */
+.screen {
+	position: relative;
+	z-index: 3;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	padding: 28px 40px;
+}
+
+/* ---------- topo ---------- */
+.topbar {
+	display: flex;
+	justify-content: space-between;
+	align-items: flex-start;
+}
+.brand {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.brand-logo {
+	width: 42px;
+	height: 42px;
+	object-fit: cover;
+	border: 3px solid var(--panel-border);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.08), inset -2px -2px 0 rgba(0,0,0,0.5);
+	flex-shrink: 0;
+}
+.brand-text {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+}
+.brand-credit {
+	font-size: 12px;
+	color: var(--text-dim);
+	letter-spacing: 0.5px;
+}
+.brand-mark {
+	font-size: 15px;
+	letter-spacing: 1px;
+	color: var(--text-main);
+	text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+	line-height: 1.6;
+}
+.brand-mark span { color: var(--accent); }
+
+.server-info {
+	text-align: right;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.server-info #server-name {
+	font-size: 14px;
+	font-family: "Press Start 2P", monospace;
+	color: var(--text-main);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+}
+.server-info #map-name {
+	font-size: 15px;
+	color: var(--accent);
+}
+
+/* ---------- conteúdo central (card) ---------- */
+.content {
+	margin-top: auto;
+	margin-bottom: 18px;
+	width: min(560px, 90vw);
+	background: var(--panel-bg);
+	border: 3px solid var(--panel-border);
+	box-shadow:
+		inset 2px 2px 0 rgba(255,255,255,0.08),
+		inset -3px -3px 0 rgba(0,0,0,0.5);
+	overflow: hidden;
+}
+
+.tabs {
+	display: flex;
+	border-bottom: 3px solid var(--panel-edge);
+	background: var(--panel-deep);
+}
+.tab-button {
+	flex: 1;
+	padding: 12px 8px;
+	background: transparent;
+	border: none;
+	border-right: 3px solid var(--panel-edge);
+	color: var(--text-dim);
+	font-family: "Press Start 2P", monospace;
+	font-size: 10px;
+	letter-spacing: 0.5px;
+	cursor: pointer;
+	transition: color 0.15s, background 0.15s;
+}
+.tab-button:last-child { border-right: none; }
+.tab-button:hover { color: var(--text-main); }
+.tab-button.active {
+	color: var(--bg-dark);
+	background: var(--accent);
+	box-shadow: inset 0 -4px 0 var(--accent-strong);
+}
+
+.panels { position: relative; }
+.tab-panel {
+	display: none;
+	padding: 18px 20px 20px;
+	max-height: 230px;
+	overflow-y: auto;
+}
+.tab-panel.active { display: block; }
+.tab-panel h3 {
+	margin: 0 0 12px;
+	font-size: 12px;
+	font-family: "Press Start 2P", monospace;
+	letter-spacing: 1px;
+	color: var(--accent);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+}
+
+/* scrollbar em estilo pixel (webkit / CEF do GMod) */
+.tab-panel::-webkit-scrollbar { width: 10px; }
+.tab-panel::-webkit-scrollbar-track { background: var(--panel-deep); }
+.tab-panel::-webkit-scrollbar-thumb { background: var(--accent-deep); border: 2px solid var(--panel-deep); }
+
+/* curiosidades */
+.curiosity {
+	font-size: 19px;
+	line-height: 1.5;
+	color: var(--text-main);
+	min-height: 60px;
+}
+.fade-in { animation: fadeIn 0.4s steps(4); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+/* fanarts */
+.fanart-grid {
+	display: grid;
+	grid-template-columns: repeat(2, 1fr);
+	gap: 12px;
+}
+.fanart-card {
+	margin: 0;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.06), inset -2px -2px 0 rgba(0,0,0,0.5);
+}
+.fanart-card img {
+	width: 100%;
+	height: 110px;
+	object-fit: cover;
+	display: block;
+	image-rendering: auto;
+}
+.fanart-card figcaption {
+	padding: 6px 8px;
+	font-size: 15px;
+	display: flex;
+	flex-direction: column;
+	border-top: 3px solid var(--panel-edge);
+}
+.fanart-card figcaption strong { font-size: 15px; }
+.fanart-card figcaption span { color: var(--text-dim); font-size: 13px; }
+
+/* perfil */
+.profile-stats {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+.profile-stat {
+	flex: 1;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.06), inset -2px -2px 0 rgba(0,0,0,0.5);
+	padding: 10px 6px;
+	text-align: center;
+}
+.profile-stat .value {
+	display: block;
+	font-family: "Press Start 2P", monospace;
+	font-size: 16px;
+	color: var(--accent);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+	margin-bottom: 6px;
+}
+.profile-stat .label {
+	font-size: 13px;
+	color: var(--text-dim);
+}
+.profile-alert {
+	padding: 10px 12px;
+	margin-bottom: 14px;
+	font-size: 15px;
+	background: rgba(255, 77, 94, 0.12);
+	border: 3px solid var(--danger);
+	color: #ffb3ba;
+}
+.profile-alert strong { font-family: "Press Start 2P", monospace; font-size: 11px; display: block; margin-bottom: 6px; }
+.profile-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.profile-list li {
+	display: flex;
+	justify-content: space-between;
+	font-size: 15px;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 6px 8px;
+}
+.profile-list time { color: var(--text-dim); font-size: 13px; }
+
+.empty-msg { color: var(--text-dim); font-size: 16px; }
+
+/* ---------- rodapé / progresso ---------- */
+.footer {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+}
+.progress-wrap { flex: 1; }
+.progress-track {
+	width: 100%;
+	height: 16px;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(0,0,0,0.6);
+	overflow: hidden;
+}
+.progress-fill {
+	height: 100%;
+	width: 0%;
+	background-color: var(--accent-strong);
+	background-image: repeating-linear-gradient(
+		90deg,
+		var(--accent) 0px, var(--accent) 10px,
+		var(--accent-strong) 10px, var(--accent-strong) 20px
+	);
+	transition: width 0.3s steps(12);
+}
+.progress-meta {
+	display: flex;
+	justify-content: space-between;
+	margin-top: 8px;
+	font-size: 15px;
+	color: var(--text-dim);
+}
+
+.discord-btn {
+	flex-shrink: 0;
+	padding: 12px 18px;
+	background: var(--accent-strong);
+	border: 3px solid var(--accent);
+	color: var(--bg-dark);
+	text-decoration: none;
+	font-family: "Press Start 2P", monospace;
+	font-size: 11px;
+	box-shadow: 4px 4px 0 rgba(0,0,0,0.55);
+	transition: transform 0.1s;
+}
+.discord-btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.55); }
+
+/* ---------- responsivo (telas pequenas / 4:3) ---------- */
+@media (max-width: 760px) {
+	.screen { padding: 16px 18px; }
+	.content { width: 100%; }
+	.fanart-grid { grid-template-columns: 1fr; }
+}
