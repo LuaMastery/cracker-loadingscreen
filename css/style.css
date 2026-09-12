@@ -201,6 +201,16 @@ html, body {
 	display: flex;
 	flex-direction: column;
 	gap: 3px;
+	/* placa sólida atrás do texto: a arte de fundo do Muguetos tem um
+	   redemoinho bem chamativo (e o texto "CRACKER GAMES" desenhado) bem
+	   nesse canto, e o gradiente escuro do .bg-overlay sozinho não escondia
+	   o suficiente — o nome do servidor e o crédito ficavam ilegíveis
+	   misturados com o desenho atrás. Uma cor sólida garante leitura em
+	   qualquer fundo, sem depender de tunar gradiente. */
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
+	padding: 5px 10px;
 }
 .brand-credit {
 	font-size: 12px;
