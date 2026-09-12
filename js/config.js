@@ -7,9 +7,6 @@ window.CRACKER_CONFIG = {
 	// Nome mostrado se o GameDetails do GMod ainda não disparou (primeiro frame).
 	fallbackServerName: "Cracker Games BR",
 
-	// Link do Discord da comunidade (botão no rodapé).
-	discordUrl: "https://discord.gg/SEU_CONVITE_AQUI",
-
 	// Site/loja/forum da comunidade, se tiver.
 	siteUrl: "",
 
@@ -45,23 +42,18 @@ window.CRACKER_CONFIG = {
 	// Tempo entre troca automática de curiosidades (ms).
 	curiosityIntervalMs: 9000,
 
-	// Tempo entre troca automática das ABAS (Curiosidades/Fanarts/Meu Perfil).
-	// O GMod desativa o clique do mouse na tela de carregamento, então as
-	// abas precisam trocar sozinhas pra o jogador ver todo o conteúdo.
-	tabIntervalMs: 8000,
-
-	// Curiosidades / fatos sobre o servidor exibidos na aba "Curiosidades".
+	// Curiosidades / fatos sobre o servidor exibidos no quadro "Você sabia?".
 	// Troque pelos fatos reais do Cracker Games BR.
 	curiosities: [
 		"Sabia que você pode soltar props com o Physgun e travá-los no ar com a tecla certa? Isso evita bagunça sem precisar de admin!",
 		"O comando !motd (ou o menu de regras) sempre traz as regras atualizadas do servidor. Dá uma lida de vez em quando.",
-		"Fanarts feitas pela comunidade aparecem na aba ao lado. Manda a sua no Discord pra ela entrar na próxima atualização!",
+		"Fanarts feitas pela comunidade aparecem no quadro ao lado. Manda a sua no Discord da comunidade pra ela entrar na próxima atualização!",
 		"O Cracker Games BR já teve dezenas de mapas diferentes rotacionando. Qual foi o seu favorito até agora?",
 		"Respeite o trabalho dos outros jogadores: destruir base de graça é motivo de punição.",
 	],
 
-	// Textos de exemplo pra aba Fanarts (título/autor). A imagem de cada
-	// entrada é o arquivo dentro de img/fanarts/ com o mesmo índice.
+	// Textos de exemplo pro quadro de Fanarts (título/autor). A imagem de
+	// cada entrada é o arquivo dentro de img/fanarts/ com o mesmo índice.
 	fanarts: [
 		{
 			file: "img/fanarts/fanart-01.png",

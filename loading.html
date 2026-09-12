@@ -27,30 +27,22 @@
 			</div>
 		</header>
 
-		<main class="content pixel-frame">
-			<nav class="tabs">
-				<button class="tab-button active" data-tab="curiosidades">Curiosidades</button>
-				<button class="tab-button" data-tab="fanarts">Fanarts</button>
-				<button class="tab-button" data-tab="perfil">Meu Perfil</button>
-			</nav>
+		<div class="panels">
+			<section id="panel-curiosidades" class="panel-card pixel-frame">
+				<h3>Você sabia?</h3>
+				<p id="curiosity-text" class="curiosity fade-in"></p>
+			</section>
 
-			<div class="panels">
-				<section id="panel-curiosidades" class="tab-panel active">
-					<h3>Você sabia?</h3>
-					<p id="curiosity-text" class="curiosity fade-in"></p>
-				</section>
+			<section id="panel-fanarts" class="panel-card pixel-frame">
+				<h3>Fanarts da comunidade</h3>
+				<div id="fanart-grid" class="fanart-grid"></div>
+			</section>
 
-				<section id="panel-fanarts" class="tab-panel">
-					<h3>Fanarts da comunidade</h3>
-					<div id="fanart-grid" class="fanart-grid"></div>
-				</section>
-
-				<section id="panel-perfil" class="tab-panel">
-					<h3>Meu Perfil</h3>
-					<div id="profile-body" class="profile-body"></div>
-				</section>
-			</div>
-		</main>
+			<section id="panel-perfil" class="panel-card pixel-frame">
+				<h3>Meu Perfil</h3>
+				<div id="profile-body" class="profile-body"></div>
+			</section>
+		</div>
 
 		<footer class="footer">
 			<div class="progress-wrap">
@@ -62,7 +54,6 @@
 					<span id="progress-label"></span>
 				</div>
 			</div>
-			<a id="discord-link" class="discord-btn" href="#" target="_blank" rel="noopener">Discord</a>
 		</footer>
 
 	</div>

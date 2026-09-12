@@ -21,9 +21,6 @@
 		el.status = document.getElementById("status-text");
 		el.progressBar = document.getElementById("progress-bar");
 		el.progressLabel = document.getElementById("progress-label");
-		el.discordLink = document.getElementById("discord-link");
-		el.tabButtons = document.querySelectorAll(".tab-button");
-		el.tabPanels = document.querySelectorAll(".tab-panel");
 		el.curiosityText = document.getElementById("curiosity-text");
 		el.fanartGrid = document.getElementById("fanart-grid");
 		el.profileBody = document.getElementById("profile-body");
@@ -189,29 +186,6 @@
 			warnsHtml;
 	}
 
-	/* ---------- abas ---------- */
-	// O GMod desativa o mouse na tela de carregamento (SetMouseInputEnabled(false)
-	// no próprio loading.lua do jogo), então cliques nunca chegam até aqui dentro
-	// do jogo. Por isso as abas trocam sozinhas — o clique continua funcionando
-	// só pra quem estiver testando isso direto no navegador.
-	function activateTab(index) {
-		el.tabButtons.forEach(function (b, i) { b.classList.toggle("active", i === index); });
-		el.tabPanels.forEach(function (p, i) { p.classList.toggle("active", i === index); });
-	}
-	function setupTabs() {
-		el.tabButtons.forEach(function (btn, index) {
-			btn.addEventListener("click", function () { activateTab(index); });
-		});
-
-		if (el.tabButtons.length > 1) {
-			var tabIndex = 0;
-			setInterval(function () {
-				tabIndex = (tabIndex + 1) % el.tabButtons.length;
-				activateTab(tabIndex);
-			}, CFG.tabIntervalMs || 8000);
-		}
-	}
-
 	/* ---------- utilitário ---------- */
 	function escapeHtml(str) {
 		return String(str).replace(/[&<>"']/g, function (c) {
@@ -264,7 +238,6 @@
 	document.addEventListener("DOMContentLoaded", function () {
 		cacheEls();
 		el.serverName.textContent = state.serverName;
-		if (CFG.discordUrl) el.discordLink.href = CFG.discordUrl;
 		if (CFG.logoFile) {
 			el.brandLogo.src = CFG.logoFile;
 			el.brandLogo.hidden = false;
@@ -278,7 +251,6 @@
 		setupCuriosities();
 		setupFanarts();
 		setupProfile();
-		setupTabs();
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {
