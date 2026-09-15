@@ -649,10 +649,23 @@ html, body {
 	);
 	transition: width 0.3s steps(12);
 }
+/* placa sólida atrás do texto de status/ETA: essa parte do rodapé fica bem
+   no canto inferior esquerdo da tela, exatamente onde a arte de fundo do
+   Muguetos tem a assinatura dele ("Designer by MUGUETO's") — sem essa
+   placa, as duas coisas (nosso texto e a assinatura) ficavam se misturando
+   ali, e nenhuma das duas dava pra ler direito. Mesma solução que já
+   funcionou pro nome do servidor lá no cabeçalho: cor sólida garante
+   leitura em qualquer fundo, sem precisar tunar gradiente nenhum. */
+.footer-status {
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
+	padding: 6px 10px;
+	margin-top: 8px;
+}
 .progress-meta {
 	display: flex;
 	justify-content: space-between;
-	margin-top: 8px;
 	font-size: 15px;
 	color: var(--text-dim);
 }
@@ -660,7 +673,7 @@ html, body {
 /* mensagem de tempo estimado até entrar no servidor de verdade (fica
    embaixo da barra, não é uma aba — é sempre visível, já que é curtinha) */
 .eta-text {
-	margin-top: 6px;
+	margin-top: 4px;
 	font-size: 14px;
 	color: var(--accent);
 	text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
