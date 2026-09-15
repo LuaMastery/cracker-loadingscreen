@@ -114,10 +114,11 @@ window.CRACKER_CONFIG = {
 	},
 
 	// Cidades brasileiras que aparecem em rotação no quadro "Clima &
-	// Horário" (embaixo do clima do próprio jogador), mostrando clima atual,
-	// mínima/máxima do dia e chance de chuva de cada uma. Adicione, remova
-	// ou troque à vontade — só precisa do nome (pra mostrar) e
-	// latitude/longitude (pra buscar o clima no Open-Meteo).
+	// Horário" — o quadro não tenta mais descobrir onde o jogador está, só
+	// mostra o clima atual, horário local, mínima/máxima do dia e chance de
+	// chuva de cada cidade daqui. Adicione, remova ou troque à vontade — só
+	// precisa do nome (pra mostrar) e latitude/longitude (pra buscar o
+	// clima no Open-Meteo).
 	popularCities: [
 		{ name: "São Paulo", lat: -23.5505, lon: -46.6333 },
 		{ name: "Rio de Janeiro", lat: -22.9068, lon: -43.1729 },

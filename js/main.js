@@ -383,15 +383,13 @@
 	}
 
 	/* ---------- painel "Clima & Horário" ---------- */
-	// Não existe permissão de localização de verdade aqui dentro (o mouse
-	// fica desativado, então nem dá pra clicar em "permitir" um popup do
-	// navegador) — por isso a cidade vem por IP (ipapi.co), sem precisar de
-	// nenhum clique. O clima vem do Open-Meteo (também sem chave de API).
-	// Se qualquer uma das duas falhar, o relógio continua funcionando
-	// normalmente (usa o horário do próprio PC como reserva), já que ele não
-	// depende de internet nenhuma.
+	// Não tenta mais descobrir onde o jogador está (nem por IP nem por
+	// nenhum outro jeito) — só mostra o clima das cidades populosas do
+	// Brasil cadastradas em CFG.popularCities, uma de cada vez, em rotação
+	// automática (sem precisar de clique nenhum). O relógio no topo é o
+	// horário do próprio PC do jogador (não depende de internet nenhuma).
 	var climaState = {
-		timezone: null, place: "", weatherDesc: null, tempC: null, timeStr: "", note: "",
+		timeStr: "",
 		// clima das cidades populares (rotaciona uma de cada vez, já que não
 		// cabem todas juntas no quadro e não dá pra clicar pra escolher).
 		cities: [], cityIndex: 0, cityRotateTimer: null,
@@ -401,49 +399,14 @@
 		updateClock();
 		setInterval(updateClock, 1000);
 		fetchCitiesWeather();
-
-		fetch("https://ipapi.co/json/", { cache: "no-store" })
-			.then(function (res) {
-				if (!res.ok) throw new Error("HTTP " + res.status);
-				return res.json();
-			})
-			.then(function (geo) {
-				climaState.timezone = geo.timezone || null;
-				climaState.place = [geo.city, geo.region].filter(Boolean).join(", ") || geo.country_name || "";
-				updateClock();
-				if (geo.latitude && geo.longitude) fetchWeather(geo.latitude, geo.longitude);
-			})
-			.catch(function () {
-				climaState.note = "Não foi possível descobrir sua localização agora.";
-				renderClima();
-			});
-	}
-
-	function fetchWeather(lat, lon) {
-		var url =
-			"https://api.open-meteo.com/v1/forecast?latitude=" + lat + "&longitude=" + lon +
-			"&current=temperature_2m,weather_code&timezone=auto";
-		fetch(url, { cache: "no-store" })
-			.then(function (res) {
-				if (!res.ok) throw new Error("HTTP " + res.status);
-				return res.json();
-			})
-			.then(function (data) {
-				var current = data.current || {};
-				climaState.tempC = typeof current.temperature_2m === "number" ? current.temperature_2m : null;
-				climaState.weatherDesc = weatherCodeToText(current.weather_code);
-				renderClima();
-			})
-			.catch(function () {
-				renderClima();
-			});
 	}
 
 	// Clima de várias cidades brasileiras populares (config: popularCities),
 	// buscado tudo de uma vez só (o Open-Meteo aceita várias
 	// latitude/longitude separadas por vírgula numa única chamada, em vez de
 	// precisar de uma requisição por cidade). Junto do clima atual, pede
-	// também a mínima/máxima e a chance de chuva do dia de cada uma.
+	// também a mínima/máxima, a chance de chuva do dia e o fuso horário de
+	// cada uma (pra mostrar o horário local de cada cidade também).
 	function fetchCitiesWeather() {
 		var cities = CFG.popularCities || [];
 		if (!cities.length) return;
@@ -469,6 +432,7 @@
 					var daily = entry.daily || {};
 					return {
 						name: cities[i].name,
+						timezone: entry.timezone || null,
 						tempC: typeof current.temperature_2m === "number" ? current.temperature_2m : null,
 						weatherDesc: weatherCodeToText(current.weather_code),
 						rainChance: daily.precipitation_probability_max ? daily.precipitation_probability_max[0] : null,
@@ -479,9 +443,7 @@
 				startCityRotation();
 			})
 			.catch(function () {
-				// silencioso: se essa parte falhar, o clima/horário do próprio
-				// jogador (que já carregou antes/depois, independente) continua
-				// funcionando normal — só não mostra as outras cidades.
+				renderClima();
 			});
 	}
 
@@ -514,51 +476,48 @@
 	}
 
 	function updateClock() {
-		var opts = { hour: "2-digit", minute: "2-digit", second: "2-digit" };
-		if (climaState.timezone) opts.timeZone = climaState.timezone;
-		try {
-			climaState.timeStr = new Intl.DateTimeFormat("pt-BR", opts).format(new Date());
-		} catch (e) {
-			// timezone inválida/desconhecida: cai pro horário local do PC.
-			climaState.timeStr = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date());
-		}
+		climaState.timeStr = new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", second: "2-digit" }).format(new Date());
 		renderClima();
 	}
 
-	function renderClima() {
-		var rows = "";
-		if (climaState.place) {
-			rows += "<li><span>Local</span><strong>" + escapeHtml(climaState.place) + "</strong></li>";
+	// Horário local de uma cidade específica (não o do PC do jogador) — usa
+	// o fuso horário que o Open-Meteo já manda de graça em cada cidade.
+	function cityLocalTime(timezone) {
+		if (!timezone) return "";
+		try {
+			return new Intl.DateTimeFormat("pt-BR", { hour: "2-digit", minute: "2-digit", timeZone: timezone }).format(new Date());
+		} catch (e) {
+			return "";
 		}
-		if (climaState.weatherDesc) {
-			var tempStr = typeof climaState.tempC === "number" ? climaState.tempC.toFixed(0) + "°C" : "";
-			rows += "<li><span>Clima</span><strong>" + escapeHtml(climaState.weatherDesc) + (tempStr ? " · " + tempStr : "") + "</strong></li>";
-		}
-		rows += "<li><span>Horário</span><strong>" + escapeHtml(climaState.timeStr || "--:--:--") + "</strong></li>";
+	}
 
-		var citiesHtml = "";
+	function renderClima() {
+		var rows = "<li><span>Horário</span><strong>" + escapeHtml(climaState.timeStr || "--:--:--") + "</strong></li>";
+
+		var citiesHtml;
 		if (climaState.cities.length) {
 			var c = climaState.cities[climaState.cityIndex];
-			var tempStr2 = typeof c.tempC === "number" ? c.tempC.toFixed(0) + "°C" : "-";
+			var tempStr = typeof c.tempC === "number" ? c.tempC.toFixed(0) + "°C" : "-";
 			var rangeStr =
 				typeof c.minC === "number" && typeof c.maxC === "number"
 					? c.minC.toFixed(0) + "° / " + c.maxC.toFixed(0) + "°"
 					: "";
 			var rainStr = typeof c.rainChance === "number" ? c.rainChance + "% de chance de chuva hoje" : "sem previsão de chuva";
+			var localTime = cityLocalTime(c.timezone);
 
 			citiesHtml =
 				"<h4>" + escapeHtml(c.name) + "</h4>" +
 				"<ul class='kv-list'>" +
-				"<li><span>Agora</span><strong>" + escapeHtml(c.weatherDesc || "-") + " · " + tempStr2 + "</strong></li>" +
+				(localTime ? "<li><span>Horário local</span><strong>" + localTime + "</strong></li>" : "") +
+				"<li><span>Agora</span><strong>" + escapeHtml(c.weatherDesc || "-") + " · " + tempStr + "</strong></li>" +
 				(rangeStr ? "<li><span>Mín / Máx hoje</span><strong>" + rangeStr + "</strong></li>" : "") +
 				"<li><span>Chuva</span><strong>" + rainStr + "</strong></li>" +
 				"</ul>";
+		} else {
+			citiesHtml = "<p class='empty-msg'>Carregando o clima das cidades...</p>";
 		}
 
-		el.climaBody.innerHTML =
-			"<ul class='kv-list'>" + rows + "</ul>" +
-			citiesHtml +
-			(climaState.note ? "<p class='empty-msg'>" + escapeHtml(climaState.note) + "</p>" : "");
+		el.climaBody.innerHTML = "<ul class='kv-list'>" + rows + "</ul>" + citiesHtml;
 	}
 
 	/* ---------- painel "Créditos" ---------- */
