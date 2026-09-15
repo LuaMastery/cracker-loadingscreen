@@ -252,13 +252,13 @@ html, body {
    do lado direito da tela (mais ou menos a partir da metade pra direita) —
    deixando os quadros mais estreitos e só do lado esquerdo, sobra uma faixa
    à direita onde o desenho fica visível, em vez dos quadros cobrirem tudo.
-   grid-auto-flow:dense + align-items:start é o que faz cada quadro ter só a
-   altura que o próprio conteúdo dele precisa, em vez de todos esticarem
-   pra bater com o vizinho mais alto da mesma linha — quem tem pouca coisa
-   (Créditos, por exemplo) fica baixinho, quem tem mais (Fanarts, Servidor,
-   Mods) fica mais alto sozinho, e o "dense" reorganiza pra preencher os
-   buracos que isso deixa, sem espaço desperdiçado nem quadro em cima de
-   outro. */
+   grid-auto-rows fica numa unidade bem pequena (8px) de propósito: cada
+   quadro recebe, via JS (resizePanelsToContent em main.js), um
+   "grid-row: span N" calculado a partir da altura real do CONTEÚDO dele —
+   isso simula um layout tipo "masonry" (cada quadro do tamanho exato que
+   precisa, sem sobrar buraco embaixo dos mais baixos), e o
+   grid-auto-flow:dense ainda reorganiza os quadros pra preencher os
+   espaços que sobrarem do lado, sem nenhum ficar em cima do outro. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
@@ -266,6 +266,14 @@ html, body {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	grid-auto-flow: dense;
+	grid-auto-rows: 8px;
+	/* essencial: sem isso o quadro estica pra preencher o "span" inteiro
+	   reservado pra ele, e a MEDIÇÃO de altura (feita em cima do próprio
+	   quadro, em main.js) passa a ler esse tamanho esticado em vez do
+	   tamanho real do conteúdo — vira um loop que infla tudo pro mesmo
+	   tamanho do maior. Com align-items:start o quadro sempre fica só do
+	   tamanho do próprio conteúdo, e o "span" apenas reserva o espaço dele
+	   no grid. */
 	align-items: start;
 	gap: 12px;
 }
@@ -283,9 +291,16 @@ html, body {
 	   overflow:auto continua só como rede de segurança pros quadros que
 	   crescem bastante (a lista de mods, por exemplo). Isso aqui é só o
 	   TETO máximo — a altura de verdade de cada quadro vem do próprio
-	   conteúdo dele (ver align-items:start acima em .panels). */
+	   conteúdo dele (ver resizePanelsToContent em main.js). */
 	max-height: 270px;
 	overflow-y: auto;
+	/* o mouse é desativado nessa tela — ninguém rola esses quadros na mão.
+	   Sem isso, o navegador às vezes rola o conteúdo sozinho por conta
+	   própria quando algo muda de tamanho lá dentro (ranking do servidor
+	   atualizando, por exemplo — o recurso chama-se "scroll anchoring"),
+	   escondendo o título do quadro sem ninguém poder rolar de volta pra
+	   cima. */
+	overflow-anchor: none;
 }
 
 /* quadros com bastante informação (nomes de arquivo compridos, listas que
@@ -431,6 +446,31 @@ html, body {
 .kv-list li span:first-child { color: var(--text-dim); }
 
 .empty-msg { color: var(--text-dim); font-size: 16px; }
+
+/* ícone de cada cidade no quadro "Clima & Horário" — desenho simples em
+   silhueta (não é foto real de ninguém nem arte de terceiros, é só uma
+   forma geométrica que lembra algo da cidade), na mesma cor de destaque do
+   quadro, só pra ajudar a diferenciar uma cidade da outra de relance. */
+.city-heading {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 0 8px;
+}
+.city-heading .city-name { margin: 0; }
+.city-icon-wrap {
+	flex-shrink: 0;
+	width: 42px;
+	height: 26px;
+	color: var(--accent);
+}
+.city-icon-wrap svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+	fill: currentColor;
+	stroke: currentColor;
+}
 
 /* mods/arquivos sendo baixados */
 .mod-list {

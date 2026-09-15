@@ -33,6 +33,35 @@
 		el.bgLayers = document.getElementById("bg-layers");
 	}
 
+	/* ---------- tamanho de cada quadro ("masonry" via grid-row: span) ---------- */
+	// .panels usa grid-auto-rows numa unidade bem pequena (8px, ver style.css)
+	// e aqui a gente mede a altura de verdade do CONTEÚDO de cada quadro e
+	// converte isso num "grid-row: span N" — assim cada quadro fica só do
+	// tamanho que precisa (nem mais, nem menos), sem sobrar espaço vazio de
+	// fundo embaixo dos quadros mais curtos. Roda de novo sozinho a cada
+	// segundo (heartbeat simples) pra se ajustar sempre que algum conteúdo
+	// mudar de tamanho (clima trocando de cidade, lista de mods crescendo,
+	// perfil terminando de carregar, etc.) sem precisar chamar isso na mão
+	// em cada função que muda alguma coisa na tela.
+	var PANEL_ROW_UNIT = 8;
+	var PANEL_ROW_GAP = 12;
+	var PANEL_MAX_HEIGHT = 270; // precisa bater com max-height do .panel-card no CSS
+
+	function resizePanelsToContent() {
+		var cards = document.querySelectorAll(".panel-card");
+		for (var i = 0; i < cards.length; i++) {
+			var card = cards[i];
+			// scrollHeight não conta a borda (3px em cima + 3px embaixo = 6px)
+			// nem passa do teto máximo do CSS — sem isso os quadros que
+			// tentassem crescer mais que o teto reservariam espaço a mais no
+			// grid do que realmente aparecem na tela.
+			var contentHeight = Math.min(card.scrollHeight, PANEL_MAX_HEIGHT - 6) + 6;
+			var span = 1;
+			while (span * PANEL_ROW_UNIT + (span - 1) * PANEL_ROW_GAP < contentHeight) span++;
+			card.style.gridRowEnd = "span " + span;
+		}
+	}
+
 	/* ---------- fundo (crossfade) ---------- */
 	var bgIndex = 0;
 	function setupBackgrounds() {
@@ -432,6 +461,7 @@
 					var daily = entry.daily || {};
 					return {
 						name: cities[i].name,
+						icon: cities[i].icon || "",
 						timezone: entry.timezone || null,
 						tempC: typeof current.temperature_2m === "number" ? current.temperature_2m : null,
 						weatherDesc: weatherCodeToText(current.weather_code),
@@ -458,6 +488,50 @@
 			}, intervalMs);
 		}
 	}
+
+	// Ícones das cidades (silhuetas simples, desenhadas do zero — não são
+	// fotos nem arte de terceiros, só formas geométricas que lembram algo da
+	// cidade), pra ajudar a diferenciar uma cidade da outra de relance no
+	// quadro "Clima & Horário". A cor vem sozinha do CSS (currentColor),
+	// então já sai na mesma cor de destaque do quadro.
+	var CITY_ICONS = {
+		skyline:
+			'<svg viewBox="0 0 100 60"><rect x="8" y="20" width="14" height="40"/><rect x="26" y="8" width="16" height="52"/>' +
+			'<rect x="46" y="28" width="12" height="32"/><rect x="64" y="14" width="14" height="46"/><rect x="82" y="34" width="10" height="26"/></svg>',
+		cristo:
+			'<svg viewBox="0 0 100 60"><polygon points="10,60 50,20 90,60"/>' +
+			'<rect x="47" y="4" width="6" height="18"/><rect x="36" y="10" width="28" height="6"/><circle cx="50" cy="6" r="5"/></svg>',
+		hills:
+			'<svg viewBox="0 0 100 60"><circle cx="28" cy="58" r="26"/><circle cx="63" cy="62" r="30"/>' +
+			'<rect x="72" y="32" width="14" height="16"/><polygon points="70,32 79,20 88,32"/></svg>',
+		congresso:
+			'<svg viewBox="0 0 100 60"><rect x="20" y="34" width="60" height="10"/><rect x="44" y="10" width="5" height="30"/>' +
+			'<rect x="53" y="14" width="5" height="26"/><polygon points="20,34 30,24 40,34"/><polygon points="62,34 72,26 82,34"/></svg>',
+		mountain:
+			'<svg viewBox="0 0 100 60"><polygon points="0,60 20,25 38,60"/><polygon points="25,60 50,15 75,60"/><polygon points="60,60 80,30 100,60"/></svg>',
+		cliff:
+			'<svg viewBox="0 0 100 60"><rect x="0" y="42" width="100" height="8"/><rect x="60" y="12" width="14" height="30"/>' +
+			'<rect x="15" y="30" width="12" height="12"/><rect x="30" y="26" width="12" height="16"/></svg>',
+		beach:
+			'<svg viewBox="0 0 100 60"><circle cx="80" cy="14" r="9"/>' +
+			'<path d="M0,46 q12,-8 24,0 q12,8 24,0 q12,-8 24,0 q12,8 24,0" fill="none" stroke-width="4"/>' +
+			'<rect x="18" y="20" width="4" height="26"/><polygon points="20,20 6,10 20,14"/><polygon points="20,20 34,10 20,14"/><polygon points="20,20 20,4 24,14"/></svg>',
+		greenhouse:
+			'<svg viewBox="0 0 100 60"><rect x="10" y="46" width="80" height="8"/><polygon points="10,46 50,10 90,46"/></svg>',
+		bridge:
+			'<svg viewBox="0 0 100 60"><rect x="10" y="30" width="80" height="6"/><rect x="20" y="36" width="6" height="20"/>' +
+			'<rect x="74" y="36" width="6" height="20"/><polygon points="30,30 50,10 70,30"/></svg>',
+		chimneys:
+			'<svg viewBox="0 0 100 60"><rect x="20" y="20" width="8" height="36"/><rect x="34" y="14" width="8" height="42"/>' +
+			'<rect x="48" y="24" width="8" height="32"/><rect x="62" y="10" width="8" height="46"/>' +
+			'<circle cx="24" cy="12" r="3"/><circle cx="38" cy="6" r="3"/><circle cx="66" cy="2" r="3"/></svg>',
+		amazon:
+			'<svg viewBox="0 0 100 60"><circle cx="35" cy="20" r="16"/><circle cx="55" cy="14" r="12"/><rect x="43" y="30" width="6" height="20"/>' +
+			'<path d="M0,54 q20,-8 40,0 q20,8 40,0 q10,-4 20,0" fill="none" stroke-width="4"/></svg>',
+		park:
+			'<svg viewBox="0 0 100 60"><rect x="28" y="20" width="4" height="30"/><polygon points="30,20 16,12 30,15"/><polygon points="30,20 44,12 30,15"/>' +
+			'<rect x="66" y="14" width="4" height="36"/><polygon points="68,14 54,6 68,9"/><polygon points="68,14 82,6 68,9"/></svg>',
+	};
 
 	function weatherCodeToText(code) {
 		var map = {
@@ -504,9 +578,13 @@
 					: "";
 			var rainStr = typeof c.rainChance === "number" ? c.rainChance + "% de chance de chuva hoje" : "sem previsão de chuva";
 			var localTime = cityLocalTime(c.timezone);
+			var iconSvg = CITY_ICONS[c.icon] || "";
 
 			citiesHtml =
-				"<h4>" + escapeHtml(c.name) + "</h4>" +
+				"<div class='city-heading'>" +
+				(iconSvg ? "<span class='city-icon-wrap'>" + iconSvg + "</span>" : "") +
+				"<h4 class='city-name'>" + escapeHtml(c.name) + "</h4>" +
+				"</div>" +
 				"<ul class='kv-list'>" +
 				(localTime ? "<li><span>Horário local</span><strong>" + localTime + "</strong></li>" : "") +
 				"<li><span>Agora</span><strong>" + escapeHtml(c.weatherDesc || "-") + " · " + tempStr + "</strong></li>" +
@@ -777,6 +855,9 @@
 		setupClima();
 		setupMusic();
 		setupCreditos();
+
+		resizePanelsToContent();
+		setInterval(resizePanelsToContent, 1000);
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {

@@ -117,21 +117,24 @@ window.CRACKER_CONFIG = {
 	// Horário" — o quadro não tenta mais descobrir onde o jogador está, só
 	// mostra o clima atual, horário local, mínima/máxima do dia e chance de
 	// chuva de cada cidade daqui. Adicione, remova ou troque à vontade — só
-	// precisa do nome (pra mostrar) e latitude/longitude (pra buscar o
-	// clima no Open-Meteo).
+	// precisa do nome (pra mostrar), latitude/longitude (pra buscar o clima
+	// no Open-Meteo) e um "icon" (o desenho pequeno ao lado do nome, pra não
+	// confundir uma cidade com a outra — as opções disponíveis estão
+	// listadas em CITY_ICONS no main.js; deixe "" ou tire a linha pra não
+	// mostrar nenhum ícone).
 	popularCities: [
-		{ name: "São Paulo", lat: -23.5505, lon: -46.6333 },
-		{ name: "Rio de Janeiro", lat: -22.9068, lon: -43.1729 },
-		{ name: "Sorocaba", lat: -23.5015, lon: -47.4526 },
-		{ name: "Brasília", lat: -15.7939, lon: -47.8828 },
-		{ name: "Belo Horizonte", lat: -19.9167, lon: -43.9345 },
-		{ name: "Salvador", lat: -12.9777, lon: -38.5016 },
-		{ name: "Fortaleza", lat: -3.7172, lon: -38.5433 },
-		{ name: "Curitiba", lat: -25.4284, lon: -49.2733 },
-		{ name: "Recife", lat: -8.0476, lon: -34.8770 },
-		{ name: "Porto Alegre", lat: -30.0346, lon: -51.2177 },
-		{ name: "Manaus", lat: -3.1190, lon: -60.0217 },
-		{ name: "Goiânia", lat: -16.6869, lon: -49.2648 },
+		{ name: "São Paulo", lat: -23.5505, lon: -46.6333, icon: "skyline" },
+		{ name: "Rio de Janeiro", lat: -22.9068, lon: -43.1729, icon: "cristo" },
+		{ name: "Sorocaba", lat: -23.5015, lon: -47.4526, icon: "hills" },
+		{ name: "Brasília", lat: -15.7939, lon: -47.8828, icon: "congresso" },
+		{ name: "Belo Horizonte", lat: -19.9167, lon: -43.9345, icon: "mountain" },
+		{ name: "Salvador", lat: -12.9777, lon: -38.5016, icon: "cliff" },
+		{ name: "Fortaleza", lat: -3.7172, lon: -38.5433, icon: "beach" },
+		{ name: "Curitiba", lat: -25.4284, lon: -49.2733, icon: "greenhouse" },
+		{ name: "Recife", lat: -8.0476, lon: -34.8770, icon: "bridge" },
+		{ name: "Porto Alegre", lat: -30.0346, lon: -51.2177, icon: "chimneys" },
+		{ name: "Manaus", lat: -3.1190, lon: -60.0217, icon: "amazon" },
+		{ name: "Goiânia", lat: -16.6869, lon: -49.2648, icon: "park" },
 	],
 
 	// Tempo entre a troca automática de cidade mostrada (ms).
