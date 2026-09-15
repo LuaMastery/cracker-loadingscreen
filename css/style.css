@@ -183,6 +183,13 @@ html, body {
 	display: flex;
 	justify-content: space-between;
 	align-items: flex-start;
+	/* o espaço entre o cabeçalho e o primeiro quadro normalmente vem do
+	   margin-top:auto do .panels (empurra os quadros pro fundo da tela,
+	   sobrando espaço em cima) — mas em telas mais baixas/estreitas, onde
+	   os quadros já ocupam quase toda a altura, esse "auto" não sobra nada
+	   e os dois ficam colados. Esse margin-bottom aqui garante uma
+	   distância mínima sempre, não importa quanto espaço sobrar. */
+	margin-bottom: 20px;
 }
 .brand {
 	display: flex;
