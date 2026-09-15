@@ -247,13 +247,18 @@ html, body {
 /* O GMod desativa o mouse na tela de carregamento, então abas clicáveis não
    funcionam de jeito nenhum aqui dentro — em vez de esconder conteúdo atrás
    de cliques que nunca vão acontecer, mostramos todas as seções juntas. */
+/* Largura reduzida (era min(980px, 94vw)) e encostada à esquerda de
+   propósito: a arte de fundo do Muguetos desenha os personagens principais
+   do lado direito da tela (mais ou menos a partir da metade pra direita) —
+   deixando os quadros mais estreitos e só do lado esquerdo, sobra uma faixa
+   à direita onde o desenho fica visível, em vez dos quadros cobrirem tudo. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
-	width: min(980px, 94vw);
+	width: min(820px, 84vw);
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
-	gap: 14px;
+	gap: 12px;
 }
 .panel-card {
 	min-width: 0;
@@ -266,8 +271,11 @@ html, body {
 	/* o mouse fica desativado na tela de carregamento do GMod, então
 	   "rolar" pra ver o que passou da altura é impossível lá dentro — por
 	   isso a altura é generosa, pra tentar caber tudo sem precisar de
-	   scroll. overflow:auto continua só como rede de segurança. */
-	max-height: 300px;
+	   scroll. overflow:auto continua só como rede de segurança. Reduzida um
+	   pouco (era 300px) junto com a largura, pra deixar mais espaço livre
+	   em cima/embaixo também, sem chegar perto da logo "CRACKER GAMES" nem
+	   da assinatura "Designer by MUGUETO's" desenhadas no fundo. */
+	max-height: 270px;
 	overflow-y: auto;
 }
 
@@ -279,6 +287,7 @@ html, body {
 #panel-fanarts       { --accent: #ff3fa6; --panel-border: #ff3fa6; --panel-edge: #b82d78; }
 #panel-perfil         { --accent: #a900ff; --panel-border: #a900ff; --panel-edge: #7300b0; }
 #panel-servidor       { --accent: #7c5cff; --panel-border: #7c5cff; --panel-edge: #4f34c7; }
+#panel-mods           { --accent: #ff8a3f; --panel-border: #ff8a3f; --panel-edge: #b8591f; }
 #panel-clima          { --accent: #3fffb0; --panel-border: #3fffb0; --panel-edge: #1fa87a; }
 #panel-musica         { --accent: #3fd0ff; --panel-border: #3fd0ff; --panel-edge: #1a8fb8; }
 #panel-creditos       { --accent: #ffd23f; --panel-border: #ffd23f; --panel-edge: #b8931f; }
@@ -407,6 +416,60 @@ html, body {
 .kv-list li span:first-child { color: var(--text-dim); }
 
 .empty-msg { color: var(--text-dim); font-size: 16px; }
+
+/* mods/arquivos sendo baixados */
+.mod-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.mod-list li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 5px 7px;
+}
+.mod-name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12.5px;
+	color: var(--text-dim);
+}
+.mod-status {
+	flex-shrink: 0;
+	font-size: 11px;
+	padding: 2px 6px;
+	border: 2px solid;
+	white-space: nowrap;
+}
+.mod-status--done {
+	color: #7dffbb;
+	border-color: #2fae76;
+	background: rgba(70, 255, 160, 0.1);
+}
+.mod-status--installing {
+	color: #ffe25a;
+	border-color: #c9a300;
+	background: rgba(255, 226, 90, 0.1);
+	animation: mod-pulse 1.2s ease-in-out infinite;
+}
+.mod-status--stalled {
+	color: #ff8b98;
+	border-color: var(--danger);
+	background: rgba(255, 77, 109, 0.12);
+}
+@keyframes mod-pulse {
+	0%, 100% { opacity: 0.55; }
+	50% { opacity: 1; }
+}
 
 /* ---------- rodapé / progresso ---------- */
 .footer {

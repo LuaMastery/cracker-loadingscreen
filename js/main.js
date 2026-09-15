@@ -25,6 +25,7 @@
 		el.fanartGrid = document.getElementById("fanart-grid");
 		el.profileBody = document.getElementById("profile-body");
 		el.serverInfoBody = document.getElementById("server-info-body");
+		el.modsBody = document.getElementById("mods-body");
 		el.climaBody = document.getElementById("clima-body");
 		el.musicBody = document.getElementById("music-body");
 		el.creditsBody = document.getElementById("credits-body");
@@ -310,6 +311,77 @@
 		renderServerPanel();
 	}
 
+	/* ---------- painel "Mods & Arquivos" ---------- */
+	// IMPORTANTE (limitação real do GMod, não é falta de código): essa tela
+	// não recebe uma lista de addons nem um código de erro de verdade quando
+	// algo falha — o jogo só avisa, um de cada vez, qual arquivo está
+	// baixando agora (DownloadingFile) e quantos ainda faltam no total
+	// (SetFilesNeeded). Não existe callback nenhum de "esse arquivo deu
+	// erro" nessa tela. Por isso o status aqui é deduzido:
+	// - o arquivo que está chegando agora fica "Instalando";
+	// - assim que o próximo arquivo começa a baixar, o anterior vira
+	//   "Confirmado" (sinal de que o jogo seguiu em frente);
+	// - se o mesmo arquivo ficar parado tempo demais sem nada mudar, mostra
+	//   "Demorando" — um AVISO, não um código de erro de verdade (esse dado
+	//   não existe aqui pra mostrar).
+	var modsState = { list: [], lastChangeAt: 0 };
+
+	function setupMods() {
+		el.modsBody.innerHTML = "<p class='empty-msg'>Aguardando o servidor começar a mandar arquivos...</p>";
+		modsState.lastChangeAt = Date.now();
+		setInterval(checkModsStall, 4000);
+	}
+
+	function trackModFile(fileName) {
+		var list = modsState.list;
+		var last = list[list.length - 1];
+		if (!last || last.name !== fileName) {
+			if (last && last.status === "installing") last.status = "done";
+			list.push({ name: fileName, status: "installing" });
+			if (list.length > 25) list.shift(); // mantém só os mais recentes, pra não crescer pra sempre
+		}
+		modsState.lastChangeAt = Date.now();
+		renderMods();
+	}
+
+	function markAllModsDone() {
+		if (!modsState.list.length) return;
+		modsState.list.forEach(function (item) {
+			if (item.status === "installing") item.status = "done";
+		});
+		renderMods();
+	}
+
+	function checkModsStall() {
+		var list = modsState.list;
+		if (!list.length) return;
+		var last = list[list.length - 1];
+		if (last.status !== "installing") return;
+		if (Date.now() - modsState.lastChangeAt > 12000) {
+			last.status = "stalled";
+			renderMods();
+		}
+	}
+
+	function renderMods() {
+		var list = modsState.list;
+		if (!list.length) return;
+		var statusLabel = { done: "Confirmado", installing: "Instalando...", stalled: "Demorando" };
+		el.modsBody.innerHTML =
+			"<ul class='mod-list'>" +
+			list
+				.slice()
+				.reverse() // mais recente primeiro
+				.map(function (item) {
+					return (
+						"<li><span class='mod-name'>" + escapeHtml(item.name) + "</span>" +
+						"<span class='mod-status mod-status--" + item.status + "'>" + statusLabel[item.status] + "</span></li>"
+					);
+				})
+				.join("") +
+			"</ul>";
+	}
+
 	/* ---------- painel "Clima & Horário" ---------- */
 	// Não existe permissão de localização de verdade aqui dentro (o mouse
 	// fica desativado, então nem dá pra clicar em "permitir" um popup do
@@ -579,6 +651,7 @@
 
 	window.DownloadingFile = function (fileName) {
 		el.status.textContent = "Baixando: " + fileName;
+		trackModFile(fileName);
 	};
 
 	function updateProgress() {
@@ -592,7 +665,10 @@
 		el.progressBar.style.width = pct.toFixed(1) + "%";
 		el.progressLabel.textContent = downloaded + " / " + state.filesTotal + " arquivos";
 		updateEta(pct);
-		if (pct >= 100) scheduleMusicFadeOut();
+		if (pct >= 100) {
+			scheduleMusicFadeOut();
+			markAllModsDone();
+		}
 	}
 
 	/* ---------- mensagem "tempo estimado pra entrar" (não é aba) ---------- */
@@ -653,18 +729,28 @@
 		setupProfile();
 		renderServerBasic(state.serverName, "", "", "");
 		setupServerStats();
+		setupMods();
 		setupClima();
 		setupMusic();
 		setupCreditos();
 
 		// Em navegador comum (fora do GMod) simula um progresso pra visualizar o design.
 		if (!window.chrome || !window.chrome.webview) {
+			var demoFiles = [
+				"maps/gm_construct.bsp",
+				"materials/props/metal_wall01.vtf",
+				"models/player/group01.mdl",
+				"sound/ambient/wind_loop1.wav",
+				"lua/autorun/client/cracker_hud.lua",
+				"resource/fonts/pixelfont.ttf",
+			];
 			var demoNeeded = 40;
 			window.SetFilesTotal(40);
 			window.SetStatusChanged("Conectando ao servidor...");
 			var demo = setInterval(function () {
 				demoNeeded -= 3;
 				window.SetFilesNeeded(Math.max(0, demoNeeded));
+				window.DownloadingFile(demoFiles[Math.floor(Math.random() * demoFiles.length)]);
 				if (demoNeeded <= 0) {
 					clearInterval(demo);
 					window.SetStatusChanged("Entrando no servidor...");
