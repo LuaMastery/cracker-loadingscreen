@@ -492,45 +492,66 @@
 	// Ícones das cidades (silhuetas simples, desenhadas do zero — não são
 	// fotos nem arte de terceiros, só formas geométricas que lembram algo da
 	// cidade), pra ajudar a diferenciar uma cidade da outra de relance no
-	// quadro "Clima & Horário". A cor vem sozinha do CSS (currentColor),
-	// então já sai na mesma cor de destaque do quadro.
+	// quadro "Clima & Horário". A cor principal vem sozinha do CSS
+	// (currentColor, mesma cor de destaque do quadro); os detalhes "vazados"
+	// (janela, porta, vão da ponte etc.) usam a classe "cutout", que o CSS
+	// pinta com a cor de fundo do próprio quadro — assim eles aparecem como
+	// um "furo" na silhueta em vez de precisar de uma segunda cor de tinta.
+	// Todos têm uma linha de chão embaixo, pra dar uma base visual comum.
 	var CITY_ICONS = {
 		skyline:
-			'<svg viewBox="0 0 100 60"><rect x="8" y="20" width="14" height="40"/><rect x="26" y="8" width="16" height="52"/>' +
-			'<rect x="46" y="28" width="12" height="32"/><rect x="64" y="14" width="14" height="46"/><rect x="82" y="34" width="10" height="26"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="54" width="100" height="6"/>' +
+			'<rect x="6" y="22" width="14" height="32"/><rect x="24" y="8" width="16" height="46"/>' +
+			'<rect x="44" y="28" width="12" height="26"/><rect x="60" y="14" width="14" height="40"/><rect x="78" y="34" width="12" height="20"/>' +
+			'<rect class="cutout" x="9" y="28" width="3" height="4"/><rect class="cutout" x="15" y="28" width="3" height="4"/>' +
+			'<rect class="cutout" x="28" y="15" width="3" height="4"/><rect class="cutout" x="34" y="15" width="3" height="4"/><rect class="cutout" x="28" y="26" width="3" height="4"/><rect class="cutout" x="34" y="26" width="3" height="4"/>' +
+			'<rect class="cutout" x="64" y="20" width="3" height="4"/><rect class="cutout" x="70" y="20" width="3" height="4"/></svg>',
 		cristo:
-			'<svg viewBox="0 0 100 60"><polygon points="10,60 50,20 90,60"/>' +
-			'<rect x="47" y="4" width="6" height="18"/><rect x="36" y="10" width="28" height="6"/><circle cx="50" cy="6" r="5"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="56" width="100" height="4"/>' +
+			'<polygon points="8,56 50,18 92,56"/>' +
+			'<rect x="47" y="2" width="6" height="20"/><rect x="34" y="9" width="32" height="6"/><circle cx="50" cy="4" r="5"/></svg>',
 		hills:
-			'<svg viewBox="0 0 100 60"><circle cx="28" cy="58" r="26"/><circle cx="63" cy="62" r="30"/>' +
-			'<rect x="72" y="32" width="14" height="16"/><polygon points="70,32 79,20 88,32"/></svg>',
+			'<svg viewBox="0 0 100 60"><circle cx="26" cy="58" r="24"/><circle cx="62" cy="62" r="30"/>' +
+			'<rect x="70" y="32" width="16" height="18"/><polygon points="68,32 78,19 88,32"/>' +
+			'<rect class="cutout" x="76" y="40" width="4" height="10"/></svg>',
 		congresso:
-			'<svg viewBox="0 0 100 60"><rect x="20" y="34" width="60" height="10"/><rect x="44" y="10" width="5" height="30"/>' +
-			'<rect x="53" y="14" width="5" height="26"/><polygon points="20,34 30,24 40,34"/><polygon points="62,34 72,26 82,34"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="56" width="100" height="4"/>' +
+			'<rect x="18" y="34" width="64" height="12"/><rect x="44" y="8" width="5" height="32"/><rect x="53" y="12" width="5" height="28"/>' +
+			'<polygon points="18,34 29,23 40,34"/><polygon points="60,34 71,25 82,34"/>' +
+			'<rect class="cutout" x="30" y="38" width="4" height="8"/><rect class="cutout" x="66" y="38" width="4" height="8"/></svg>',
 		mountain:
-			'<svg viewBox="0 0 100 60"><polygon points="0,60 20,25 38,60"/><polygon points="25,60 50,15 75,60"/><polygon points="60,60 80,30 100,60"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="56" width="100" height="4"/>' +
+			'<polygon points="0,58 20,24 38,58"/><polygon points="25,58 50,13 75,58"/><polygon points="60,58 80,29 100,58"/>' +
+			'<polygon class="cutout" points="47,22 50,17 53,22 50,26"/></svg>',
 		cliff:
-			'<svg viewBox="0 0 100 60"><rect x="0" y="42" width="100" height="8"/><rect x="60" y="12" width="14" height="30"/>' +
-			'<rect x="15" y="30" width="12" height="12"/><rect x="30" y="26" width="12" height="16"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="44" width="100" height="10"/>' +
+			'<rect x="58" y="10" width="16" height="34"/><rect x="14" y="28" width="14" height="16"/><rect x="31" y="22" width="14" height="22"/>' +
+			'<rect class="cutout" x="63" y="16" width="6" height="8"/><rect class="cutout" x="19" y="34" width="4" height="6"/><rect class="cutout" x="36" y="30" width="4" height="6"/></svg>',
 		beach:
-			'<svg viewBox="0 0 100 60"><circle cx="80" cy="14" r="9"/>' +
-			'<path d="M0,46 q12,-8 24,0 q12,8 24,0 q12,-8 24,0 q12,8 24,0" fill="none" stroke-width="4"/>' +
-			'<rect x="18" y="20" width="4" height="26"/><polygon points="20,20 6,10 20,14"/><polygon points="20,20 34,10 20,14"/><polygon points="20,20 20,4 24,14"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="52" width="100" height="4"/>' +
+			'<circle cx="80" cy="14" r="9"/>' +
+			'<path d="M2,44 q12,-8 24,0 q12,8 24,0 q12,-8 24,0 q12,8 24,0" fill="none" stroke-width="4"/>' +
+			'<rect x="18" y="18" width="4" height="28"/><polygon points="20,18 4,9 20,13"/><polygon points="20,18 36,9 20,13"/><polygon points="20,18 20,2 25,12"/></svg>',
 		greenhouse:
-			'<svg viewBox="0 0 100 60"><rect x="10" y="46" width="80" height="8"/><polygon points="10,46 50,10 90,46"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="52" width="100" height="4"/>' +
+			'<rect x="10" y="44" width="80" height="8"/><polygon points="10,44 50,8 90,44"/>' +
+			'<path d="M50,8 L50,44 M28,44 L50,24 M72,44 L50,24" fill="none" stroke-width="2" class="cutout-stroke"/></svg>',
 		bridge:
-			'<svg viewBox="0 0 100 60"><rect x="10" y="30" width="80" height="6"/><rect x="20" y="36" width="6" height="20"/>' +
-			'<rect x="74" y="36" width="6" height="20"/><polygon points="30,30 50,10 70,30"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="54" width="100" height="4"/>' +
+			'<rect x="8" y="30" width="84" height="6"/><rect x="18" y="36" width="6" height="18"/><rect x="76" y="36" width="6" height="18"/>' +
+			'<polygon points="28,30 50,8 72,30"/><polygon class="cutout" points="42,30 50,18 58,30"/></svg>',
 		chimneys:
-			'<svg viewBox="0 0 100 60"><rect x="20" y="20" width="8" height="36"/><rect x="34" y="14" width="8" height="42"/>' +
+			'<svg viewBox="0 0 100 60"><rect x="0" y="56" width="100" height="4"/>' +
+			'<rect x="20" y="20" width="8" height="36"/><rect x="34" y="14" width="8" height="42"/>' +
 			'<rect x="48" y="24" width="8" height="32"/><rect x="62" y="10" width="8" height="46"/>' +
 			'<circle cx="24" cy="12" r="3"/><circle cx="38" cy="6" r="3"/><circle cx="66" cy="2" r="3"/></svg>',
 		amazon:
-			'<svg viewBox="0 0 100 60"><circle cx="35" cy="20" r="16"/><circle cx="55" cy="14" r="12"/><rect x="43" y="30" width="6" height="20"/>' +
+			'<svg viewBox="0 0 100 60"><circle cx="33" cy="20" r="17"/><circle cx="55" cy="13" r="13"/><rect x="42" y="30" width="6" height="20"/>' +
 			'<path d="M0,54 q20,-8 40,0 q20,8 40,0 q10,-4 20,0" fill="none" stroke-width="4"/></svg>',
 		park:
-			'<svg viewBox="0 0 100 60"><rect x="28" y="20" width="4" height="30"/><polygon points="30,20 16,12 30,15"/><polygon points="30,20 44,12 30,15"/>' +
-			'<rect x="66" y="14" width="4" height="36"/><polygon points="68,14 54,6 68,9"/><polygon points="68,14 82,6 68,9"/></svg>',
+			'<svg viewBox="0 0 100 60"><rect x="0" y="54" width="100" height="4"/>' +
+			'<rect x="28" y="18" width="4" height="32"/><polygon points="30,18 14,9 30,13"/><polygon points="30,18 46,9 30,13"/>' +
+			'<rect x="66" y="12" width="4" height="38"/><polygon points="68,12 52,3 68,7"/><polygon points="68,12 84,3 68,7"/></svg>',
 	};
 
 	function weatherCodeToText(code) {
@@ -678,25 +699,69 @@
 		musicState.audio.pause();
 	}
 
+	// Monta um "letreiro andando" (ver .marquee no CSS): o texto some duas
+	// vezes seguidas (a 2ª cópia fica escondida até a hora de entrar em
+	// cena) — se não precisar animar (texto curto, cabe de boa), a 2ª cópia
+	// nunca aparece, já que o .marquee corta tudo que passa da largura dele.
+	function marqueeHtml(text, extraClass) {
+		var safe = escapeHtml(text);
+		return (
+			"<span class='marquee" + (extraClass ? " " + extraClass : "") + "'><span class='marquee__text'>" +
+			"<span class='marquee__copy'>" + safe + "</span><span class='marquee__copy'>" + safe + "</span>" +
+			"</span></span>"
+		);
+	}
+
 	function renderMusicPanel() {
 		var volumePct = Math.round((musicState.audio.volume || 0) * 100);
 		var track = musicState.tracks[musicState.index];
 
-		var listHtml = "<h4>Playlist</h4><ul class='kv-list'>" +
+		var listHtml =
+			"<h4>Playlist</h4><ul class='music-track-list'>" +
 			musicState.tracks
 				.map(function (t, i) {
-					var marker = i === musicState.index ? "▶ " : "";
-					return "<li><span>" + marker + escapeHtml(t.title) + "</span><strong>" + escapeHtml(t.artist || "") + "</strong></li>";
+					var playing = i === musicState.index;
+					return (
+						"<li" + (playing ? " class='is-playing'" : "") + ">" +
+						marqueeHtml((playing ? "▶ " : "") + t.title) +
+						"<strong>" + escapeHtml(t.artist || "") + "</strong></li>"
+					);
 				})
 				.join("") +
 			"</ul>";
 
 		el.musicBody.innerHTML =
 			"<ul class='kv-list'>" +
-			"<li><span>Agora</span><strong>" + escapeHtml(track.title) + "</strong></li>" +
+			"<li><span>Agora</span>" + marqueeHtml(track.title, "kv-value") + "</li>" +
 			"<li><span>Volume</span><strong>" + volumePct + "%</strong></li>" +
 			"</ul>" +
 			listHtml;
+
+		applyMarquees(el.musicBody);
+	}
+
+	// Liga o "letreiro andando" só nos textos que realmente não cabem no
+	// espaço deles — mede a largura de verdade de UMA cópia do texto contra
+	// a largura disponível depois que o navegador terminou de desenhar
+	// (requestAnimationFrame), e só então decide animar. Texto curto nunca
+	// anima: fica parado, normal.
+	function applyMarquees(container) {
+		requestAnimationFrame(function () {
+			var wraps = container.querySelectorAll(".marquee");
+			for (var i = 0; i < wraps.length; i++) {
+				var wrap = wraps[i];
+				var firstCopy = wrap.querySelector(".marquee__copy");
+				if (!firstCopy) continue;
+				var singleWidth = firstCopy.getBoundingClientRect().width;
+				if (singleWidth <= wrap.clientWidth + 2) continue;
+
+				var textEl = wrap.querySelector(".marquee__text");
+				textEl.style.setProperty("--marquee-distance", singleWidth + "px");
+				var seconds = Math.max(5, singleWidth * 0.045);
+				textEl.style.animationDuration = seconds.toFixed(1) + "s";
+				wrap.classList.add("marquee--scroll");
+			}
+		});
 	}
 
 	// REDE DE SEGURANÇA apenas — quem normalmente corta a música é o

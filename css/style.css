@@ -440,17 +440,101 @@ html, body {
 	padding: 5px 7px;
 }
 .kv-list li span:first-child { flex-shrink: 0; }
-.kv-list li strong { text-align: right; }
+.kv-list li strong { text-align: right; min-width: 0; }
 .kv-list time { color: var(--text-dim); font-size: 13px; }
 .kv-list li strong { color: var(--accent); }
+/* valor de um kv-list que precisa de "letreiro andando" em vez de cortar
+   (ver .marquee mais abaixo) — mesma cor/alinhamento do <strong> normal,
+   só que sem ser um <strong> (o marquee precisa ser um bloco, e bloco
+   dentro de elemento inline dá problema de layout em alguns casos). */
+.kv-list li .kv-value {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	color: var(--accent);
+}
 .kv-list li span:first-child { color: var(--text-dim); }
 
 .empty-msg { color: var(--text-dim); font-size: 16px; }
 
+/* "letreiro andando" pra nome comprido (música, principalmente) — em vez de
+   cortar o texto ou espichar o quadro pra caber, o texto anda devagar
+   dentro do espaço que já existe. Só liga quando o JS mede que o texto de
+   verdade não cabe (applyMarquees em main.js); texto curto fica parado
+   normal. Usa só transform (nada de filter/blend-mode), que é o que
+   realmente funciona dentro do Chromium do GMod. */
+.marquee {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	min-width: 0;
+}
+.marquee__text { display: inline-flex; white-space: nowrap; }
+/* o texto real aparece 2x seguidas (a segunda cópia some, escondida pelo
+   overflow:hidden do .marquee, até a primeira sair de cena) — o JS mede a
+   largura exata de UMA cópia (--marquee-distance) e a animação anda
+   exatamente essa distância, então quando ela "reinicia" a segunda cópia já
+   está na posição exata onde a primeira começou: sem salto, sem costura
+   visível, looping de verdade. */
+.marquee__copy { display: inline-block; white-space: nowrap; padding-right: 32px; }
+/* a 2ª cópia só existe pro loop sem costura de quem está de fato animando —
+   se não tiver a classe --scroll (texto curto, coube numa boa), ela fica
+   escondida, senão apareceria "colada" do lado da primeira. */
+.marquee__text > .marquee__copy:nth-of-type(2) { display: none; }
+.marquee--scroll .marquee__text > .marquee__copy:nth-of-type(2) { display: inline-block; }
+.marquee--scroll .marquee__text {
+	animation-name: marquee-scroll;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+@keyframes marquee-scroll {
+	from { transform: translateX(0); }
+	to { transform: translateX(calc(-1 * var(--marquee-distance, 50%))); }
+}
+
+/* playlist da música: aqui quem é comprido é o TÍTULO (ao contrário dos
+   outros kv-list, onde o rótulo à esquerda é sempre curto), por isso usa
+   uma lista própria em vez do .kv-list genérico. */
+.music-track-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.music-track-list li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13.5px;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 5px 7px;
+}
+.music-track-list li.is-playing { border-color: var(--accent); }
+.music-track-list .marquee {
+	flex: 1 1 auto;
+	color: var(--text-dim);
+}
+.music-track-list li.is-playing .marquee { color: var(--text-main); }
+.music-track-list strong {
+	flex-shrink: 0;
+	max-width: 40%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--accent);
+	font-size: 13px;
+}
+
 /* ícone de cada cidade no quadro "Clima & Horário" — desenho simples em
    silhueta (não é foto real de ninguém nem arte de terceiros, é só uma
    forma geométrica que lembra algo da cidade), na mesma cor de destaque do
-   quadro, só pra ajudar a diferenciar uma cidade da outra de relance. */
+   quadro, só pra ajudar a diferenciar uma cidade da outra de relance. Fica
+   dentro de uma placa com borda (igual o resto da UI) em vez de flutuar
+   solto em cima do fundo do quadro — fica mais "objeto de interface" e
+   menos rabisco perdido. */
 .city-heading {
 	display: flex;
 	align-items: center;
@@ -460,9 +544,13 @@ html, body {
 .city-heading .city-name { margin: 0; }
 .city-icon-wrap {
 	flex-shrink: 0;
-	width: 42px;
-	height: 26px;
+	width: 60px;
+	height: 42px;
+	padding: 4px 6px;
 	color: var(--accent);
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
 }
 .city-icon-wrap svg {
 	width: 100%;
@@ -471,6 +559,8 @@ html, body {
 	fill: currentColor;
 	stroke: currentColor;
 }
+.city-icon-wrap svg .cutout { fill: var(--panel-deep); stroke: none; }
+.city-icon-wrap svg .cutout-stroke { stroke: var(--panel-deep); }
 
 /* mods/arquivos sendo baixados */
 .mod-list {
