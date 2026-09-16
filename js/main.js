@@ -34,7 +34,7 @@
 	}
 
 	/* ---------- tamanho de cada quadro ("masonry" via grid-row: span) ---------- */
-	// .panels usa grid-auto-rows numa unidade bem pequena (8px, ver style.css)
+	// .panels usa grid-auto-rows numa unidade bem miúda (2px, ver style.css)
 	// e aqui a gente mede a altura de verdade do CONTEÚDO de cada quadro e
 	// converte isso num "grid-row: span N" — assim cada quadro fica só do
 	// tamanho que precisa (nem mais, nem menos), sem sobrar espaço vazio de
@@ -43,19 +43,23 @@
 	// mudar de tamanho (clima trocando de cidade, lista de mods crescendo,
 	// perfil terminando de carregar, etc.) sem precisar chamar isso na mão
 	// em cada função que muda alguma coisa na tela.
-	var PANEL_ROW_UNIT = 8;
-	var PANEL_ROW_GAP = 12;
-	var PANEL_MAX_HEIGHT = 270; // precisa bater com max-height do .panel-card no CSS
+	var PANEL_ROW_UNIT = 2;
+	var PANEL_ROW_GAP = 6; // precisa bater com row-gap do .panels no CSS
 
 	function resizePanelsToContent() {
 		var cards = document.querySelectorAll(".panel-card");
 		for (var i = 0; i < cards.length; i++) {
 			var card = cards[i];
+			// o teto máximo vem do CSS de verdade (não de um número fixo aqui)
+			// — assim continua certo mesmo quando o teto muda, tipo no modo
+			// mobile (media query lá no style.css), sem precisar manter dois
+			// números iguais em dois arquivos diferentes.
+			var maxHeight = parseFloat(getComputedStyle(card).maxHeight) || 270;
 			// scrollHeight não conta a borda (3px em cima + 3px embaixo = 6px)
-			// nem passa do teto máximo do CSS — sem isso os quadros que
-			// tentassem crescer mais que o teto reservariam espaço a mais no
-			// grid do que realmente aparecem na tela.
-			var contentHeight = Math.min(card.scrollHeight, PANEL_MAX_HEIGHT - 6) + 6;
+			// nem passa do teto máximo — sem isso os quadros que tentassem
+			// crescer mais que o teto reservariam espaço a mais no grid do que
+			// realmente aparecem na tela.
+			var contentHeight = Math.min(card.scrollHeight, maxHeight - 6) + 6;
 			var span = 1;
 			while (span * PANEL_ROW_UNIT + (span - 1) * PANEL_ROW_GAP < contentHeight) span++;
 			card.style.gridRowEnd = "span " + span;

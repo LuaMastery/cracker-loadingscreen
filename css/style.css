@@ -259,13 +259,16 @@ html, body {
    do lado direito da tela (mais ou menos a partir da metade pra direita) —
    deixando os quadros mais estreitos e só do lado esquerdo, sobra uma faixa
    à direita onde o desenho fica visível, em vez dos quadros cobrirem tudo.
-   grid-auto-rows fica numa unidade bem pequena (8px) de propósito: cada
+   grid-auto-rows fica numa unidade bem miúda (2px) de propósito: cada
    quadro recebe, via JS (resizePanelsToContent em main.js), um
    "grid-row: span N" calculado a partir da altura real do CONTEÚDO dele —
    isso simula um layout tipo "masonry" (cada quadro do tamanho exato que
    precisa, sem sobrar buraco embaixo dos mais baixos), e o
    grid-auto-flow:dense ainda reorganiza os quadros pra preencher os
-   espaços que sobrarem do lado, sem nenhum ficar em cima do outro. */
+   espaços que sobrarem do lado. Unidade pequena = "folga" de arredondamento
+   pequena (o span sempre arredonda pra cima) — com uma unidade grande, o
+   quadro podia reservar bem mais espaço do que o conteúdo de verdade
+   precisava, e sobrava um vão vazio antes do próximo quadro começar. */
 .panels {
 	margin-top: auto;
 	margin-bottom: 18px;
@@ -273,7 +276,7 @@ html, body {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
 	grid-auto-flow: dense;
-	grid-auto-rows: 8px;
+	grid-auto-rows: 2px;
 	/* essencial: sem isso o quadro estica pra preencher o "span" inteiro
 	   reservado pra ele, e a MEDIÇÃO de altura (feita em cima do próprio
 	   quadro, em main.js) passa a ler esse tamanho esticado em vez do
@@ -282,7 +285,12 @@ html, body {
 	   tamanho do próprio conteúdo, e o "span" apenas reserva o espaço dele
 	   no grid. */
 	align-items: start;
-	gap: 12px;
+	/* linha (vertical) mais apertada que coluna (horizontal) de propósito —
+	   é o vão vertical entre um quadro e o de baixo que o Rhuan quer bem
+	   colado; entre um quadro e o vizinho do lado ainda vale manter uma
+	   separação confortável pra não embolar tudo. */
+	row-gap: 6px;
+	column-gap: 12px;
 }
 .panel-card {
 	min-width: 0;
@@ -684,4 +692,8 @@ html, body {
 	.screen { padding: 16px 18px 110px; }
 	.panels { grid-template-columns: 1fr; width: 100%; }
 	.panel-card { max-height: 130px; }
+	/* só 1 coluna existe aqui — sem isso o Mods (que pede 2 colunas na tela
+	   grande) forçava o navegador a criar uma 2ª coluna implícita mesmo
+	   nessa largura, quebrando o empilhamento de coluna única. */
+	#panel-mods { grid-column: span 1; }
 }
