@@ -284,6 +284,23 @@ html, body {
 	align-items: start;
 	gap: 12px;
 }
+
+/* espaço vazio reservado de propósito no canto superior esquerdo da grade.
+   Não é um quadro nosso — é pra ficar livre pra Steam desenhar por cima as
+   notificações dela (tipo "fulano também tá jogando", com avatar redondo e
+   tudo), que aparecem bem nesse canto por padrão na maioria das
+   configurações. A Steam desenha isso numa camada acima do nosso HTML, sem
+   nenhum jeito de nós controlarmos ou escondermos isso via código — só dá
+   pra evitar que os NOSSOS quadros nasçam bem em cima, reduzindo a chance
+   de colisão. Elemento oculto (visibility:hidden), só ocupa o espaço no
+   grid mesmo, o grid-auto-flow:dense continua enchendo o resto ao redor
+   normalmente. */
+.panel-spacer {
+	grid-column: 1;
+	grid-row: span 11;
+	visibility: hidden;
+}
+
 .panel-card {
 	min-width: 0;
 	background: var(--panel-bg);
@@ -684,4 +701,7 @@ html, body {
 	.screen { padding: 16px 18px 110px; }
 	.panels { grid-template-columns: 1fr; width: 100%; }
 	.panel-card { max-height: 130px; }
+	/* numa coluna só, reservar 11 linhas empurraria TODOS os quadros pra
+	   baixo à toa — nessa largura o espaço reservado não faz mais sentido. */
+	.panel-spacer { display: none; }
 }
