@@ -29,7 +29,6 @@ html, body {
 	color: var(--text-main);
 	font-family: "VT323", "Courier New", monospace;
 	font-size: 18px;
-	image-rendering: pixelated;
 }
 
 .pixel-font {
