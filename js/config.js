@@ -71,16 +71,21 @@ window.CRACKER_CONFIG = {
 	],
 
 	// Música tocando de fundo na tela de carregamento. Toca sozinha (sem
-	// precisar de clique, já que o mouse não funciona aqui) e passa pra
-	// próxima da lista quando uma termina.
+	// precisar de clique, já que o mouse não funciona aqui), em loop
+	// permanente — por decisão do Rhuan, de agora em diante fica só essa
+	// UMA música fixa na tela de carregamento (nada de trocar/embaralhar
+	// entre várias). Se um dia quiser voltar a ter mais de uma, é só
+	// adicionar de volta na lista "tracks" abaixo — o sistema de
+	// shuffle/troca automática continua funcionando, só está com 1 música
+	// só por enquanto.
 	// volume vai de 0 (mudo) a 1 (máximo) — 0.15 é baixinho de propósito,
 	// só ambiente, pra dar pra conversar/jogar sem a música atrapalhar.
 	music: {
 		volume: 0.15,
 
-		// Toca as músicas em ordem embaralhada (sorteio), não sempre na
-		// mesma ordem da lista abaixo.
-		shuffle: true,
+		// Só faz sentido embaralhar com mais de uma música na lista — com
+		// uma só, isso não muda nada (fica sempre a mesma, em loop).
+		shuffle: false,
 
 		// A música para sozinha assim que a página detecta que está sendo
 		// fechada (evento "pagehide"/"unload" do navegador) — isso acontece
@@ -100,19 +105,12 @@ window.CRACKER_CONFIG = {
 
 		tracks: [
 			{
+				// versão incompleta/cortada (o Rhuan não achou a música
+				// completa) — troque o arquivo aqui se aparecer uma versão
+				// completa depois.
 				file: "audio/track-01-to-damn-all.mp3",
 				title: "To Damn All of the Things I Cannot Do",
 				artist: "Zephaniah",
-			},
-			{
-				file: "audio/track-02-torva.mp3",
-				title: "Torva",
-				artist: "Reece Moseley",
-			},
-			{
-				file: "audio/track-03-solitude.mp3",
-				title: "Solitude",
-				artist: "Anthony Septim",
 			},
 		],
 	},
