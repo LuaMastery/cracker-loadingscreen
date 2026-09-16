@@ -27,11 +27,15 @@ window.CRACKER_CONFIG = {
 
 	// Galeria de imagens de fundo (troca automática entre elas).
 	// Por enquanto, desativada de propósito: só entra arte feita pelo
-	// Muguetos pra Cracker Games BR. Os screenshots oficiais do Garry's Mod
-	// continuam salvos em img/bg/ (gmod-01.jpg a gmod-06.jpg) — é só
-	// descomentar as linhas abaixo pra eles voltarem a aparecer na rotação.
+	// Muguetos pra Cracker Games BR. muguetos-bg-02 é a versão nova (sem
+	// nenhum texto desenhado nela); a bg-01 (versão antiga, com "CRACKER
+	// GAMES" e a assinatura desenhados) fica comentada aqui só de
+	// referência. Os screenshots oficiais do Garry's Mod continuam salvos
+	// em img/bg/ (gmod-01.jpg a gmod-06.jpg) — é só descomentar as linhas
+	// abaixo pra eles voltarem a aparecer na rotação.
 	backgrounds: [
-		"img/bg/muguetos-bg-01.png",
+		"img/bg/muguetos-bg-02.png",
+		// "img/bg/muguetos-bg-01.png",
 		// "img/bg/gmod-01.jpg",
 		// "img/bg/gmod-02.jpg",
 		// "img/bg/gmod-03.jpg",
