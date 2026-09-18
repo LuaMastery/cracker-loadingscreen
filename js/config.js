@@ -11,7 +11,7 @@ window.CRACKER_CONFIG = {
 	siteUrl: "",
 
 	// Logo oficial da Cracker Games BR, mostrada no cabeçalho da tela.
-	logoFile: "img/fanarts/muguetos-crackedface.png",
+	logoFile: "img/fanarts/cracker-games-logo-02.png",
 	// Crédito do autor da arte usada como logo (aparece pequeno, abaixo do
 	// nome). Deixe "" se não quiser mostrar nenhum crédito.
 	logoCredit: "logo por Muguetos",
