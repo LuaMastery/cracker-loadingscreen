@@ -87,21 +87,9 @@ window.CRACKER_CONFIG = {
 		// uma só, isso não muda nada (fica sempre a mesma, em loop).
 		shuffle: false,
 
-		// A música para sozinha assim que a página detecta que está sendo
-		// fechada (evento "pagehide"/"unload" do navegador) — isso acontece
-		// exatamente quando o GMod remove essa tela pra mostrar o jogo de
-		// verdade, então é o sinal mais correto que existe. Cortar ali é
-		// esperado: como a troca de tela acontece no mesmíssimo instante,
-		// não dá pra perceber como um corte seco.
-		//
-		// fadeDelayMs/fadeDurationMs abaixo são só uma REDE DE SEGURANÇA
-		// (bem mais longa, de propósito) pro caso raro do evento de
-		// fechamento não disparar — não deve ser o que normalmente corta a
-		// música. Se mesmo assim a música ainda cortar cedo demais (com a
-		// tela de carregamento ainda visível), me avisa, porque nesse caso
-		// o problema é outro, não é tempo.
-		fadeDelayMs: 60000,
-		fadeDurationMs: 4000,
+		// Não existe mais nenhum timer que abaixa/corta a música perto do fim
+		// do carregamento. Ela só para quando o GMod fecha essa tela de
+		// verdade (evento "pagehide"/"unload" do navegador).
 
 		tracks: [
 			{
