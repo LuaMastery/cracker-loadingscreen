@@ -180,7 +180,7 @@ html, body {
 /* ---------- topo ---------- */
 .topbar {
 	display: flex;
-	justify-content: space-between;
+	justify-content: flex-end;
 	align-items: flex-start;
 	/* o espaço entre o cabeçalho e o primeiro quadro normalmente vem do
 	   margin-top:auto do .panels (empurra os quadros pro fundo da tela,
@@ -193,7 +193,9 @@ html, body {
 .brand {
 	display: flex;
 	align-items: center;
+	justify-content: flex-end;
 	gap: 12px;
+	margin-top: 8px;
 }
 .brand-logo {
 	width: 42px;
