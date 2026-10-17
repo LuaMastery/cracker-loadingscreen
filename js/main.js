@@ -698,7 +698,6 @@
 	}
 
 	function stopMusicNow() {
-		if (musicFadeTimer) clearInterval(musicFadeTimer);
 		if (!musicState.audio) return;
 		musicState.audio.pause();
 	}
@@ -768,45 +767,6 @@
 		});
 	}
 
-	// REDE DE SEGURANÇA apenas — quem normalmente corta a música é o
-	// listener de "pagehide"/"unload" lá em cima (dispara exatamente quando
-	// o GMod fecha essa tela). Isso aqui só existe pro caso raro desse
-	// evento não disparar; por isso o delay padrão é bem mais longo
-	// (fadeDelayMs no config.js), pra não cortar a música cedo demais com
-	// a tela de carregamento ainda visível.
-	var musicFadeScheduled = false;
-	var musicFadeTimer = null;
-	function scheduleMusicFadeOut() {
-		if (musicFadeScheduled || !musicState.audio) return;
-		musicFadeScheduled = true;
-
-		var music = CFG.music || {};
-		var delayMs = typeof music.fadeDelayMs === "number" ? music.fadeDelayMs : 15000;
-		setTimeout(fadeOutMusic, delayMs);
-	}
-
-	function fadeOutMusic() {
-		if (!musicState.audio) return;
-
-		var music = CFG.music || {};
-		var durationMs = typeof music.fadeDurationMs === "number" ? music.fadeDurationMs : 6000;
-		var stepMs = 120;
-		var steps = Math.max(1, Math.round(durationMs / stepMs));
-		var startVolume = musicState.audio.volume;
-		var stepAmount = startVolume / steps;
-
-		musicFadeTimer = setInterval(function () {
-			var next = musicState.audio.volume - stepAmount;
-			if (next <= 0) {
-				musicState.audio.volume = 0;
-				musicState.audio.pause();
-				clearInterval(musicFadeTimer);
-				return;
-			}
-			musicState.audio.volume = next;
-		}, stepMs);
-	}
-
 	/* ---------- utilitário ---------- */
 	function escapeHtml(str) {
 		return String(str).replace(/[&<>"']/g, function (c) {
@@ -856,10 +816,7 @@
 		el.progressBar.style.width = pct.toFixed(1) + "%";
 		el.progressLabel.textContent = downloaded + " / " + state.filesTotal + " arquivos";
 		updateEta(pct);
-		if (pct >= 100) {
-			scheduleMusicFadeOut();
-			markAllModsDone();
-		}
+		if (pct >= 100) markAllModsDone();
 	}
 
 	/* ---------- mensagem "tempo estimado pra entrar" (não é aba) ---------- */
