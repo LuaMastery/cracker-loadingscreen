@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap");
+/* fontes pixeladas do Google removidas: o visual Aero usa a Segoe UI do Windows */
 
 :root {
 	/* paleta extraída da logo oficial (arte do Muguetos) */
@@ -709,3 +709,179 @@ html, body {
 	   nessa largura, quebrando o empilhamento de coluna única. */
 	#panel-mods { grid-column: span 1; }
 }
+
+/* =====================================================================================================
+   VISUAL FRUTIGER AERO (2026-11) — camada por cima de tudo acima.
+   Vidro com cantos arredondados, brilho na metade de cima, céu azul-água, colina verde e bolhas.
+   Só usa o que funciona no Chromium "fora da tela" do GMod: degradês, border-radius, box-shadow,
+   transform e opacity (nada de filter, backdrop-filter nem mix-blend-mode).
+   ===================================================================================================== */
+:root {
+	--accent: #5fd0ff;
+	--accent-strong: #1896de;
+	--accent-deep: #0b5fa0;
+	--bg-dark: #06223e;
+	--panel-bg: rgba(14, 62, 104, 0.80);
+	--panel-border: rgba(255, 255, 255, 0.38);
+	--panel-edge: rgba(255, 255, 255, 0.20);
+	--panel-deep: rgba(4, 30, 56, 0.55);
+	--text-main: #f4fbff;
+	--text-dim: #a8d4ef;
+	--leaf: #7ed957;
+	--glass-top: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0) 100%);
+}
+
+html, body {
+	font-family: "Segoe UI", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+	font-size: 15px;
+}
+.pixel-font, .server-info #server-name, .panel-card h3, .profile-stat .value, .profile-alert strong {
+	font-family: "Segoe UI Semibold", "Segoe UI", "Trebuchet MS", Arial, sans-serif !important;
+	letter-spacing: 0.2px;
+}
+
+/* céu por cima das fotos (o tingimento roxo antigo sai) */
+.bg-tint { display: none; }
+.bg-dim { background: rgba(4, 22, 44, 0.45); }
+.bg-overlay {
+	background:
+		radial-gradient(ellipse 700px 420px at 0% 0%, rgba(4, 30, 60, 0.85) 0%, rgba(4, 30, 60, 0) 100%),
+		radial-gradient(ellipse 900px 520px at 70% -10%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%),
+		linear-gradient(180deg, rgba(40, 150, 220, 0.55) 0%, rgba(14, 80, 140, 0.35) 45%, rgba(4, 34, 66, 0.82) 100%);
+}
+
+/* colina verde e brilho do horizonte (a "natureza" da Aero) */
+.aero-hill {
+	position: absolute;
+	left: -20%;
+	right: -20%;
+	bottom: -62vh;
+	height: 80vh;
+	z-index: 3;
+	border-radius: 50%;
+	background: radial-gradient(ellipse at 50% 0%, rgba(150, 230, 100, 0.55) 0%, rgba(50, 150, 60, 0.45) 30%, rgba(10, 60, 30, 0) 70%);
+	pointer-events: none;
+}
+
+/* bolhas subindo devagar */
+.aero-bubbles { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+.aero-bubbles span {
+	position: absolute;
+	bottom: -80px;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background:
+		radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.85) 10%, rgba(255,255,255,0) 22%),
+		radial-gradient(circle at 50% 50%, rgba(170, 230, 255, 0.06) 55%, rgba(200, 240, 255, 0.35) 70%, rgba(255,255,255,0.55) 74%, rgba(255,255,255,0) 76%);
+	animation: aero-rise 16s linear infinite;
+	opacity: 0;
+}
+.aero-bubbles span:nth-child(1)  { left: 6%;  width: 22px; height: 22px; animation-duration: 14s; animation-delay: 0s; }
+.aero-bubbles span:nth-child(2)  { left: 14%; width: 40px; height: 40px; animation-duration: 19s; animation-delay: 3s; }
+.aero-bubbles span:nth-child(3)  { left: 23%; width: 16px; height: 16px; animation-duration: 12s; animation-delay: 6s; }
+.aero-bubbles span:nth-child(4)  { left: 35%; width: 30px; height: 30px; animation-duration: 17s; animation-delay: 1s; }
+.aero-bubbles span:nth-child(5)  { left: 47%; width: 52px; height: 52px; animation-duration: 22s; animation-delay: 8s; }
+.aero-bubbles span:nth-child(6)  { left: 58%; width: 20px; height: 20px; animation-duration: 13s; animation-delay: 4s; }
+.aero-bubbles span:nth-child(7)  { left: 66%; width: 36px; height: 36px; animation-duration: 18s; animation-delay: 10s; }
+.aero-bubbles span:nth-child(8)  { left: 74%; width: 24px; height: 24px; animation-duration: 15s; animation-delay: 2s; }
+.aero-bubbles span:nth-child(9)  { left: 82%; width: 46px; height: 46px; animation-duration: 21s; animation-delay: 7s; }
+.aero-bubbles span:nth-child(10) { left: 89%; width: 18px; height: 18px; animation-duration: 12s; animation-delay: 5s; }
+.aero-bubbles span:nth-child(11) { left: 94%; width: 28px; height: 28px; animation-duration: 16s; animation-delay: 11s; }
+.aero-bubbles span:nth-child(12) { left: 40%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 9s; }
+@keyframes aero-rise {
+	0%   { transform: translate(0, 0); opacity: 0; }
+	8%   { opacity: 0.9; }
+	50%  { transform: translate(18px, -55vh); }
+	92%  { opacity: 0.8; }
+	100% { transform: translate(-10px, -115vh); opacity: 0; }
+}
+
+/* enfeites dos cantos viram bolinhas de vidro */
+.corner-deco { clip-path: none; border-radius: 50%; width: 14px; height: 14px; }
+.corner-deco--tl { background: radial-gradient(circle at 35% 30%, #ffffff 0%, #9fe4ff 30%, #1896de 100%); box-shadow: 0 0 12px 2px rgba(95, 208, 255, 0.8); }
+.corner-deco--tr { background: radial-gradient(circle at 35% 30%, #ffffff 0%, #c8f5a0 30%, #4caf3a 100%); box-shadow: 0 0 12px 2px rgba(126, 217, 87, 0.8); }
+
+/* moldura: de cantos cortados em pixel pra vidro arredondado */
+.pixel-frame { clip-path: none !important; border-radius: 14px; }
+.pixel-frame::before { display: none; }
+
+.panel-card {
+	background: var(--glass-top), linear-gradient(180deg, rgba(30, 110, 170, 0.82) 0%, rgba(10, 52, 92, 0.86) 100%);
+	border: 1px solid var(--panel-border);
+	border-radius: 14px;
+	box-shadow: 0 8px 22px rgba(0, 20, 50, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(120, 220, 255, 0.25);
+}
+/* cor de cada quadro: tons Aero (vidro azul, folha, céu...) */
+#panel-curiosidades { --accent: #7fdcff; }
+#panel-fanarts       { --accent: #ff9fd0; }
+#panel-perfil        { --accent: #9ee6ff; }
+#panel-servidor      { --accent: #b9c8ff; }
+#panel-mods          { --accent: #ffc27a; }
+#panel-clima         { --accent: #9ff07a; }
+#panel-musica        { --accent: #6fe0e0; }
+#panel-creditos      { --accent: #ffe07a; }
+#panel-curiosidades, #panel-fanarts, #panel-perfil, #panel-servidor, #panel-mods, #panel-clima, #panel-musica, #panel-creditos {
+	--panel-border: rgba(255, 255, 255, 0.38);
+	--panel-edge: rgba(255, 255, 255, 0.20);
+}
+.panel-card h3 {
+	font-size: 15px;
+	color: var(--accent);
+	text-shadow: 0 1px 2px rgba(0, 20, 50, 0.8), 0 0 8px rgba(120, 220, 255, 0.35);
+}
+.panel-card h4 { font-size: 12px; }
+.curiosity { font-size: 15px; line-height: 1.45; }
+
+/* tudo que era caixinha quadrada vira vidro arredondado */
+.kv-list li, .music-track-list li, .mod-list li, .fanart-card, .profile-stat, .city-icon-wrap, .footer-status, .brand-text, .profile-alert {
+	background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 100%), var(--panel-deep);
+	border: 1px solid var(--panel-edge);
+	border-radius: 9px;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.fanart-card { overflow: hidden; }
+.fanart-card img { background: rgba(4, 30, 56, 0.6); }
+.fanart-card figcaption { border-top: 1px solid var(--panel-edge); }
+.music-track-list li.is-playing { border-color: var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 10px rgba(95, 208, 255, 0.35); }
+.mod-status { border-width: 1px; border-radius: 999px; padding: 2px 8px; }
+.profile-alert { border-color: rgba(255, 110, 130, 0.7); background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255, 80, 100, 0.12)); }
+.kv-list li, .music-track-list li { font-size: 13px; }
+
+/* topo: nome e logo */
+.brand-text { padding: 6px 12px; }
+.brand-mark { font-family: "Segoe UI Black", "Segoe UI", Arial, sans-serif; font-size: 17px; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0, 20, 50, 0.9); }
+.brand-mark span { color: var(--leaf); }
+.server-info #server-name { font-size: 18px; text-shadow: 0 1px 3px rgba(0, 20, 50, 0.9); }
+.server-info #map-name { color: #9fe4ff; }
+.brand-logo { border: none; border-radius: 50%; width: 68px; height: 68px; object-fit: contain; box-shadow: 0 6px 16px rgba(0, 20, 50, 0.5); }
+
+/* barra de progresso: pílula de vidro azul -> verde, com brilho correndo */
+.progress-track {
+	height: 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.06)), rgba(4, 30, 56, 0.7);
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.progress-fill {
+	border-radius: 999px;
+	background-color: #1896de;
+	background-image:
+		linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.25) 48%, rgba(255,255,255,0) 52%, rgba(255,255,255,0.12) 100%),
+		linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 100%),
+		linear-gradient(90deg, #1896de 0%, #36c2e8 55%, #7ed957 100%);
+	background-size: 100% 100%, 120px 100%, 100% 100%;
+	background-repeat: no-repeat, repeat-x, no-repeat;
+	transition: width 0.35s ease;
+	animation: aero-sheen 1.8s linear infinite;
+}
+@keyframes aero-sheen {
+	from { background-position: 0 0, -120px 0, 0 0; }
+	to   { background-position: 0 0, 600px 0, 0 0; }
+}
+.progress-meta { font-size: 14px; }
+.eta-text { color: #9fe4ff; text-shadow: 0 1px 2px rgba(0, 20, 50, 0.8); }
+
+.panel-card::-webkit-scrollbar-track { background: rgba(4, 30, 56, 0.5); border-radius: 8px; }
+.panel-card::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #5fd0ff, #1896de); border: 2px solid rgba(4, 30, 56, 0.5); border-radius: 8px; }
