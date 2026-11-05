@@ -11,12 +11,10 @@ window.CRACKER_CONFIG = {
 	siteUrl: "",
 
 	// Logo oficial da Cracker Games BR, mostrada no cabeçalho da tela.
-	// Visual Frutiger Aero (2026-11): logo de vidro nova. A arte original do Muguetos continua em
-	// img/fanarts/cracker-games-logo-02.png — pra voltar, troque o arquivo abaixo e o crédito.
-	logoFile: "img/fanarts/cracker-games-logo-aero.png",
+	logoFile: "img/fanarts/cracker-games-logo-02.png",
 	// Crédito do autor da arte usada como logo (aparece pequeno, abaixo do
 	// nome). Deixe "" se não quiser mostrar nenhum crédito.
-	logoCredit: "",
+	logoCredit: "logo por Muguetos",
 
 	// URL base da API (api/profile.php, api/server_stats.php). Deixe "" para
 	// desativar os quadros "Meu Perfil" e o ranking do quadro "Servidor"

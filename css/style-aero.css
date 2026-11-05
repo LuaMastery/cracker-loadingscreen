@@ -1,0 +1,889 @@
+/* VISUAL FRUTIGER AERO (EM DESENVOLVIMENTO) - versão guardada, NÃO usada pela tela. Pra testar: trocar o link do loading.html
+   pra css/style-aero.css, voltar as bolhas/colina no loading.html e a logo img/fanarts/cracker-games-logo-aero.png no js/config.js. */
+/* fontes pixeladas do Google removidas: o visual Aero usa a Segoe UI do Windows */
+
+:root {
+	/* paleta extraída da logo oficial (arte do Muguetos) */
+	--accent: #e838ff;
+	--accent-strong: #9b30ff;
+	--accent-deep: #5b1fb8;
+	--bg-dark: #0a0414;
+	--panel-bg: #150a28;
+	--panel-border: #9b30ff;
+	--panel-edge: #5b1fb8;
+	--panel-deep: #0d0620;
+	--text-main: #f5ecff;
+	--text-dim: #b79fdb;
+	--danger: #ff4d6d;
+	--pixel: 6px; /* tamanho do "corte" de pixel usado nos cantos */
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+	position: relative;
+	margin: 0;
+	padding: 0;
+	width: 100%;
+	height: 100%;
+	overflow: hidden;
+	background: var(--bg-dark);
+	color: var(--text-main);
+	font-family: "VT323", "Courier New", monospace;
+	font-size: 18px;
+}
+
+.pixel-font {
+	font-family: "Press Start 2P", monospace;
+}
+
+/* ---------- fundo (fotos reais, galeria) ---------- */
+/* position:absolute em vez de fixed de propósito: o Chromium embutido do
+   GMod (bem mais antigo que um navegador comum) não estava renderizando
+   camadas position:fixed corretamente — a tela ficava toda preta. Como
+   body/html já tem position:relative e ocupa 100% da tela, absolute com
+   inset:0 dá exatamente o mesmo resultado visual e funciona lá dentro. */
+#bg-layers {
+	position: absolute;
+	inset: 0;
+	z-index: 0;
+}
+.bg-layer {
+	position: absolute;
+	inset: 0;
+	background-size: cover;
+	background-position: center;
+	opacity: 0;
+	transition: opacity 1.6s ease;
+	/* o filter (brightness/saturate/contrast) fica só de bônus pra quem
+	   testar isso num navegador normal — dentro do GMod ele NÃO faz nada,
+	   porque o Chromium ali roda em modo "renderização fora da tela"
+	   (pra virar textura 3D) e esse modo não aplica CSS filter. Por isso
+	   quem realmente escurece é a camada sólida .bg-dim logo abaixo,
+	   que é só transparência básica (isso sim funciona em qualquer modo). */
+	filter: grayscale(0.55) brightness(0.6) contrast(1.1);
+}
+.bg-layer.active { opacity: 1; }
+
+.bg-layer--branded {
+	filter: saturate(0.55) brightness(0.35) contrast(0.95);
+}
+
+/* escurecida garantida (transparência simples, funciona em qualquer modo
+   do Chromium, ao contrário do filter). Sozinha já deixa a arte bem mais
+   discreta; some de vez quando alguém testar isso fora do GMod se quiser
+   ver a arte "crua" — não é o caso aqui, então fica sempre ativa. */
+.bg-dim {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	background: rgba(6, 2, 14, 0.62);
+}
+
+/* tingimento duotone: força o mesmo roxo/magenta da logo em QUALQUER foto,
+   sem depender das cores originais (hue-rotate reagia diferente em cada
+   screenshot). mix-blend-mode "hue" pinta a tonalidade mantendo o brilho.
+   Igual o filter, mix-blend-mode também depende de aceleração de GPU que
+   o modo "fora da tela" do GMod pode não dar — por isso é só bônus aqui
+   também, o .bg-dim acima é quem garante o visual escurecido de qualquer
+   forma. */
+.bg-tint {
+	position: absolute;
+	inset: 0;
+	z-index: 2;
+	background: linear-gradient(135deg, #a900ff 0%, #7512ff 55%, #dd00ff 100%);
+	mix-blend-mode: hue;
+	opacity: 0.9;
+	transition: opacity 0.6s ease;
+}
+.bg-tint.bg-tint--off { opacity: 0; }
+
+.bg-overlay {
+	position: absolute;
+	inset: 0;
+	z-index: 3;
+	background:
+		/* mancha escura só no canto superior esquerdo, pra apagar qualquer
+		   texto/detalhe do fundo bem atrás da nossa logo/nome do servidor */
+		radial-gradient(ellipse 680px 420px at 0% 0%, rgba(8,3,16,0.96) 0%, rgba(8,3,16,0.7) 50%, rgba(8,3,16,0) 100%),
+		radial-gradient(ellipse at 50% 100%, rgba(10,4,20,0.85) 0%, rgba(30,10,50,0.4) 45%, rgba(10,4,20,0.65) 100%),
+		linear-gradient(180deg, rgba(10,4,20,0.65) 0%, rgba(20,8,40,0.1) 30%, rgba(10,4,20,0.7) 100%);
+}
+
+/* ---------- enfeites animados nos cantos ---------- */
+/* Só nos cantos de cima de propósito: os de baixo são onde o próprio GMod
+   desenha a caixinha nativa de status/"Cancelar" (canto inferior direito) e
+   às vezes um texto de status (canto inferior esquerdo) — colocar animação
+   ali brigaria com isso. Usa só transform+opacity (nada de filter nem
+   mix-blend-mode), que é o que realmente funciona no Chromium do GMod. */
+.corner-deco {
+	position: absolute;
+	z-index: 5;
+	width: 16px;
+	height: 16px;
+	clip-path: polygon(50% 0%, 100% 50%, 50% 100%, 0% 50%);
+	pointer-events: none;
+	animation: cracker-pulse 2.4s ease-in-out infinite;
+}
+.corner-deco--tl {
+	top: 10px;
+	left: 10px;
+	background: #e838ff;
+	box-shadow: 0 0 10px 2px #e838ff;
+}
+.corner-deco--tr {
+	top: 10px;
+	right: 10px;
+	background: #3fd0ff;
+	box-shadow: 0 0 10px 2px #3fd0ff;
+	animation-delay: 1.2s;
+}
+@keyframes cracker-pulse {
+	0%, 100% { transform: scale(0.7); opacity: 0.45; }
+	50% { transform: scale(1.15); opacity: 1; }
+}
+
+/* ---------- utilitário: moldura com cantos cortados em pixel ---------- */
+.pixel-frame {
+	--pf-cut: var(--pixel);
+	position: relative;
+	clip-path: polygon(
+		0 var(--pf-cut), var(--pf-cut) var(--pf-cut), var(--pf-cut) 0,
+		calc(100% - var(--pf-cut)) 0, calc(100% - var(--pf-cut)) var(--pf-cut), 100% var(--pf-cut),
+		100% calc(100% - var(--pf-cut)), calc(100% - var(--pf-cut)) calc(100% - var(--pf-cut)), calc(100% - var(--pf-cut)) 100%,
+		var(--pf-cut) 100%, var(--pf-cut) calc(100% - var(--pf-cut)), 0 calc(100% - var(--pf-cut))
+	);
+}
+.pixel-frame::before {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translate(5px, 5px);
+	background: #000;
+	opacity: 0.55;
+	clip-path: inherit;
+	z-index: -1;
+}
+
+/* ---------- layout geral ---------- */
+.screen {
+	position: relative;
+	z-index: 4;
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+	height: 100%;
+	/* o padding-bottom maior é de propósito: o GMod desenha por cima, no
+	   canto inferior, uma caixinha nativa de status/"Cancelar" que a gente
+	   não controla — esse espaço deixa nosso rodapé livre dela. */
+	padding: 28px 40px 130px;
+}
+
+/* ---------- topo ---------- */
+.topbar {
+	display: flex;
+	justify-content: flex-end;
+	align-items: flex-start;
+	/* o espaço entre o cabeçalho e o primeiro quadro normalmente vem do
+	   margin-top:auto do .panels (empurra os quadros pro fundo da tela,
+	   sobrando espaço em cima) — mas em telas mais baixas/estreitas, onde
+	   os quadros já ocupam quase toda a altura, esse "auto" não sobra nada
+	   e os dois ficam colados. Esse margin-bottom aqui garante uma
+	   distância mínima sempre, não importa quanto espaço sobrar. */
+	margin-bottom: 20px;
+}
+.brand {
+	display: flex;
+	align-items: center;
+	justify-content: flex-end;
+	gap: 12px;
+	margin-top: 8px;
+}
+.brand-logo {
+	width: 68px;
+	height: 68px;
+	object-fit: cover;
+	border: 3px solid var(--panel-border);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.08), inset -2px -2px 0 rgba(0,0,0,0.5);
+	flex-shrink: 0;
+}
+.brand-text {
+	display: flex;
+	flex-direction: column;
+	gap: 3px;
+	/* placa sólida atrás do texto: a arte de fundo do Muguetos tem um
+	   redemoinho bem chamativo (e o texto "CRACKER GAMES" desenhado) bem
+	   nesse canto, e o gradiente escuro do .bg-overlay sozinho não escondia
+	   o suficiente — o nome do servidor e o crédito ficavam ilegíveis
+	   misturados com o desenho atrás. Uma cor sólida garante leitura em
+	   qualquer fundo, sem depender de tunar gradiente. */
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
+	padding: 5px 10px;
+}
+.brand-credit {
+	font-size: 12px;
+	color: var(--text-dim);
+	letter-spacing: 0.5px;
+}
+.brand-mark {
+	font-size: 15px;
+	letter-spacing: 1px;
+	color: var(--text-main);
+	text-shadow: 3px 3px 0 rgba(0,0,0,0.7);
+	line-height: 1.6;
+}
+.brand-mark span { color: var(--accent); }
+
+.server-info {
+	text-align: right;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.server-info #server-name {
+	font-size: 14px;
+	font-family: "Press Start 2P", monospace;
+	color: var(--text-main);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.7);
+}
+.server-info #map-name {
+	font-size: 15px;
+	color: var(--accent);
+}
+
+/* ---------- painéis (todos visíveis ao mesmo tempo, em grade) ---------- */
+/* O GMod desativa o mouse na tela de carregamento, então abas clicáveis não
+   funcionam de jeito nenhum aqui dentro — em vez de esconder conteúdo atrás
+   de cliques que nunca vão acontecer, mostramos todas as seções juntas. */
+/* Largura reduzida (era min(980px, 94vw)) e encostada à esquerda de
+   propósito: a arte de fundo do Muguetos desenha os personagens principais
+   do lado direito da tela (mais ou menos a partir da metade pra direita) —
+   deixando os quadros mais estreitos e só do lado esquerdo, sobra uma faixa
+   à direita onde o desenho fica visível, em vez dos quadros cobrirem tudo.
+   grid-auto-rows fica numa unidade bem miúda (2px) de propósito: cada
+   quadro recebe, via JS (resizePanelsToContent em main.js), um
+   "grid-row: span N" calculado a partir da altura real do CONTEÚDO dele —
+   isso simula um layout tipo "masonry" (cada quadro do tamanho exato que
+   precisa, sem sobrar buraco embaixo dos mais baixos), e o
+   grid-auto-flow:dense ainda reorganiza os quadros pra preencher os
+   espaços que sobrarem do lado. Unidade pequena = "folga" de arredondamento
+   pequena (o span sempre arredonda pra cima) — com uma unidade grande, o
+   quadro podia reservar bem mais espaço do que o conteúdo de verdade
+   precisava, e sobrava um vão vazio antes do próximo quadro começar. */
+.panels {
+	margin-top: auto;
+	margin-bottom: 18px;
+	width: min(820px, 84vw);
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	grid-auto-flow: dense;
+	grid-auto-rows: 2px;
+	/* essencial: sem isso o quadro estica pra preencher o "span" inteiro
+	   reservado pra ele, e a MEDIÇÃO de altura (feita em cima do próprio
+	   quadro, em main.js) passa a ler esse tamanho esticado em vez do
+	   tamanho real do conteúdo — vira um loop que infla tudo pro mesmo
+	   tamanho do maior. Com align-items:start o quadro sempre fica só do
+	   tamanho do próprio conteúdo, e o "span" apenas reserva o espaço dele
+	   no grid. */
+	align-items: start;
+	/* linha (vertical) mais apertada que coluna (horizontal) de propósito —
+	   é o vão vertical entre um quadro e o de baixo que o Rhuan quer bem
+	   colado; entre um quadro e o vizinho do lado ainda vale manter uma
+	   separação confortável pra não embolar tudo. */
+	row-gap: 6px;
+	column-gap: 12px;
+}
+.panel-card {
+	min-width: 0;
+	background: var(--panel-bg);
+	border: 3px solid var(--panel-border);
+	box-shadow:
+		inset 2px 2px 0 rgba(255,255,255,0.08),
+		inset -3px -3px 0 rgba(0,0,0,0.5);
+	padding: 12px 14px 14px;
+	/* o mouse fica desativado na tela de carregamento do GMod, então
+	   "rolar" pra ver o que passou da altura é impossível lá dentro — por
+	   isso o teto é generoso, pra tentar caber tudo sem precisar de scroll.
+	   overflow:auto continua só como rede de segurança pros quadros que
+	   crescem bastante (a lista de mods, por exemplo). Isso aqui é só o
+	   TETO máximo — a altura de verdade de cada quadro vem do próprio
+	   conteúdo dele (ver resizePanelsToContent em main.js). */
+	max-height: 270px;
+	overflow-y: auto;
+	/* o mouse é desativado nessa tela — ninguém rola esses quadros na mão.
+	   Sem isso, o navegador às vezes rola o conteúdo sozinho por conta
+	   própria quando algo muda de tamanho lá dentro (ranking do servidor
+	   atualizando, por exemplo — o recurso chama-se "scroll anchoring"),
+	   escondendo o título do quadro sem ninguém poder rolar de volta pra
+	   cima. */
+	overflow-anchor: none;
+}
+
+/* quadros com bastante informação (nomes de arquivo compridos, listas que
+   crescem sozinhas) ganham 2 colunas de largura em vez de 1, pra não
+   precisar cortar tudo com reticências — o grid-auto-flow:dense reorganiza
+   os quadros menores ao redor pra preencher os buracos que isso deixa. */
+#panel-mods { grid-column: span 2; }
+
+/* cada quadro com sua própria cor de destaque (reaproveita as mesmas
+   variáveis --accent/--panel-border/--panel-edge que todo o resto do CSS
+   já usa, então título, borda, sombra e valores em destaque mudam juntos
+   sem precisar duplicar regra nenhuma). */
+#panel-curiosidades { --accent: #e838ff; --panel-border: #e838ff; --panel-edge: #9b1fb0; }
+#panel-fanarts       { --accent: #ff3fa6; --panel-border: #ff3fa6; --panel-edge: #b82d78; }
+#panel-perfil         { --accent: #a900ff; --panel-border: #a900ff; --panel-edge: #7300b0; }
+#panel-servidor       { --accent: #7c5cff; --panel-border: #7c5cff; --panel-edge: #4f34c7; }
+#panel-mods           { --accent: #ff8a3f; --panel-border: #ff8a3f; --panel-edge: #b8591f; }
+#panel-clima          { --accent: #3fffb0; --panel-border: #3fffb0; --panel-edge: #1fa87a; }
+#panel-musica         { --accent: #3fd0ff; --panel-border: #3fd0ff; --panel-edge: #1a8fb8; }
+#panel-creditos       { --accent: #ffd23f; --panel-border: #ffd23f; --panel-edge: #b8931f; }
+.panel-card h3 {
+	margin: 0 0 10px;
+	font-size: 11px;
+	font-family: "Press Start 2P", monospace;
+	letter-spacing: 1px;
+	color: var(--accent);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+}
+.panel-card h4 {
+	margin: 12px 0 8px;
+	font-size: 11px;
+	color: var(--text-dim);
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+}
+.panel-card h4:first-child { margin-top: 0; }
+
+/* scrollbar em estilo pixel (webkit / CEF do GMod) */
+.panel-card::-webkit-scrollbar { width: 8px; }
+.panel-card::-webkit-scrollbar-track { background: var(--panel-deep); }
+.panel-card::-webkit-scrollbar-thumb { background: var(--accent-deep); border: 2px solid var(--panel-deep); }
+
+/* curiosidades */
+.curiosity {
+	font-size: 19px;
+	line-height: 1.5;
+	color: var(--text-main);
+	min-height: 60px;
+}
+.fade-in { animation: fadeIn 0.4s steps(4); }
+@keyframes fadeIn { from { opacity: 0; transform: translateY(4px);} to { opacity: 1; transform: translateY(0);} }
+
+/* fanarts */
+.fanart-grid {
+	display: grid;
+	grid-template-columns: 1fr;
+	gap: 10px;
+}
+.fanart-card {
+	margin: 0;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.06), inset -2px -2px 0 rgba(0,0,0,0.5);
+}
+.fanart-card img {
+	width: 100%;
+	height: 150px;
+	/* contain em vez de cover: a imagem inteira sempre aparece, sem cortar
+	   nenhum pedaço — pode sobrar uma faixa vazia dos lados (mostra a cor
+	   de fundo do card), mas nunca perde parte do desenho. */
+	object-fit: contain;
+	background: var(--bg-dark);
+	display: block;
+	image-rendering: auto;
+}
+.fanart-card figcaption {
+	padding: 6px 8px;
+	font-size: 15px;
+	display: flex;
+	flex-direction: column;
+	border-top: 3px solid var(--panel-edge);
+}
+.fanart-card figcaption strong { font-size: 15px; }
+.fanart-card figcaption span { color: var(--text-dim); font-size: 13px; }
+
+/* perfil */
+.profile-stats {
+	display: flex;
+	gap: 10px;
+	margin-bottom: 16px;
+}
+.profile-stat {
+	flex: 1;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(255,255,255,0.06), inset -2px -2px 0 rgba(0,0,0,0.5);
+	padding: 10px 6px;
+	text-align: center;
+}
+.profile-stat .value {
+	display: block;
+	font-family: "Press Start 2P", monospace;
+	font-size: 16px;
+	color: var(--accent);
+	text-shadow: 2px 2px 0 rgba(0,0,0,0.6);
+	margin-bottom: 6px;
+}
+.profile-stat .label {
+	font-size: 13px;
+	color: var(--text-dim);
+}
+.profile-alert {
+	padding: 10px 12px;
+	margin-bottom: 14px;
+	font-size: 15px;
+	background: rgba(255, 77, 94, 0.12);
+	border: 3px solid var(--danger);
+	color: #ffb3ba;
+}
+.profile-alert strong { font-family: "Press Start 2P", monospace; font-size: 11px; display: block; margin-bottom: 6px; }
+.kv-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.kv-list li {
+	display: flex;
+	justify-content: space-between;
+	gap: 8px;
+	font-size: 13.5px;
+	line-height: 1.3;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 5px 7px;
+}
+.kv-list li span:first-child { flex-shrink: 0; }
+.kv-list li strong { text-align: right; min-width: 0; }
+.kv-list time { color: var(--text-dim); font-size: 13px; }
+.kv-list li strong { color: var(--accent); }
+/* valor de um kv-list que precisa de "letreiro andando" em vez de cortar
+   (ver .marquee mais abaixo) — mesma cor/alinhamento do <strong> normal,
+   só que sem ser um <strong> (o marquee precisa ser um bloco, e bloco
+   dentro de elemento inline dá problema de layout em alguns casos). */
+.kv-list li .kv-value {
+	flex: 1 1 auto;
+	min-width: 0;
+	text-align: right;
+	color: var(--accent);
+}
+.kv-list li span:first-child { color: var(--text-dim); }
+
+.empty-msg { color: var(--text-dim); font-size: 16px; }
+
+/* "letreiro andando" pra nome comprido (música, principalmente) — em vez de
+   cortar o texto ou espichar o quadro pra caber, o texto anda devagar
+   dentro do espaço que já existe. Só liga quando o JS mede que o texto de
+   verdade não cabe (applyMarquees em main.js); texto curto fica parado
+   normal. Usa só transform (nada de filter/blend-mode), que é o que
+   realmente funciona dentro do Chromium do GMod. */
+.marquee {
+	display: block;
+	overflow: hidden;
+	white-space: nowrap;
+	min-width: 0;
+}
+.marquee__text { display: inline-flex; white-space: nowrap; }
+/* o texto real aparece 2x seguidas (a segunda cópia some, escondida pelo
+   overflow:hidden do .marquee, até a primeira sair de cena) — o JS mede a
+   largura exata de UMA cópia (--marquee-distance) e a animação anda
+   exatamente essa distância, então quando ela "reinicia" a segunda cópia já
+   está na posição exata onde a primeira começou: sem salto, sem costura
+   visível, looping de verdade. */
+.marquee__copy { display: inline-block; white-space: nowrap; padding-right: 32px; }
+/* a 2ª cópia só existe pro loop sem costura de quem está de fato animando —
+   se não tiver a classe --scroll (texto curto, coube numa boa), ela fica
+   escondida, senão apareceria "colada" do lado da primeira. */
+.marquee__text > .marquee__copy:nth-of-type(2) { display: none; }
+.marquee--scroll .marquee__text > .marquee__copy:nth-of-type(2) { display: inline-block; }
+.marquee--scroll .marquee__text {
+	animation-name: marquee-scroll;
+	animation-timing-function: linear;
+	animation-iteration-count: infinite;
+}
+@keyframes marquee-scroll {
+	from { transform: translateX(0); }
+	to { transform: translateX(calc(-1 * var(--marquee-distance, 50%))); }
+}
+
+/* playlist da música: aqui quem é comprido é o TÍTULO (ao contrário dos
+   outros kv-list, onde o rótulo à esquerda é sempre curto), por isso usa
+   uma lista própria em vez do .kv-list genérico. */
+.music-track-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.music-track-list li {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	font-size: 13.5px;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 5px 7px;
+}
+.music-track-list li.is-playing { border-color: var(--accent); }
+.music-track-list .marquee {
+	flex: 1 1 auto;
+	color: var(--text-dim);
+}
+.music-track-list li.is-playing .marquee { color: var(--text-main); }
+.music-track-list strong {
+	flex-shrink: 0;
+	max-width: 40%;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	color: var(--accent);
+	font-size: 13px;
+}
+
+/* ícone de cada cidade no quadro "Clima & Horário" — desenho simples em
+   silhueta (não é foto real de ninguém nem arte de terceiros, é só uma
+   forma geométrica que lembra algo da cidade), na mesma cor de destaque do
+   quadro, só pra ajudar a diferenciar uma cidade da outra de relance. Fica
+   dentro de uma placa com borda (igual o resto da UI) em vez de flutuar
+   solto em cima do fundo do quadro — fica mais "objeto de interface" e
+   menos rabisco perdido. */
+.city-heading {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	margin: 12px 0 8px;
+}
+.city-heading .city-name { margin: 0; }
+.city-icon-wrap {
+	flex-shrink: 0;
+	width: 60px;
+	height: 42px;
+	padding: 4px 6px;
+	color: var(--accent);
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
+}
+.city-icon-wrap svg {
+	width: 100%;
+	height: 100%;
+	display: block;
+	fill: currentColor;
+	stroke: currentColor;
+}
+.city-icon-wrap svg .cutout { fill: var(--panel-deep); stroke: none; }
+.city-icon-wrap svg .cutout-stroke { stroke: var(--panel-deep); }
+
+/* mods/arquivos sendo baixados */
+.mod-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+}
+.mod-list li {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 8px;
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	padding: 5px 7px;
+}
+.mod-name {
+	min-width: 0;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+	font-size: 12.5px;
+	color: var(--text-dim);
+}
+.mod-status {
+	flex-shrink: 0;
+	font-size: 11px;
+	padding: 2px 6px;
+	border: 2px solid;
+	white-space: nowrap;
+}
+.mod-status--done {
+	color: #7dffbb;
+	border-color: #2fae76;
+	background: rgba(70, 255, 160, 0.1);
+}
+.mod-status--installing {
+	color: #ffe25a;
+	border-color: #c9a300;
+	background: rgba(255, 226, 90, 0.1);
+	animation: mod-pulse 1.2s ease-in-out infinite;
+}
+.mod-status--stalled {
+	color: #ff8b98;
+	border-color: var(--danger);
+	background: rgba(255, 77, 109, 0.12);
+}
+@keyframes mod-pulse {
+	0%, 100% { opacity: 0.55; }
+	50% { opacity: 1; }
+}
+
+/* ---------- rodapé / progresso ---------- */
+.footer {
+	display: flex;
+	align-items: center;
+	gap: 18px;
+}
+.progress-wrap { flex: 1; }
+.progress-track {
+	width: 100%;
+	height: 16px;
+	background: var(--panel-deep);
+	border: 3px solid var(--panel-edge);
+	box-shadow: inset 2px 2px 0 rgba(0,0,0,0.6);
+	overflow: hidden;
+}
+.progress-fill {
+	height: 100%;
+	width: 0%;
+	background-color: var(--accent-strong);
+	background-image: repeating-linear-gradient(
+		90deg,
+		var(--accent) 0px, var(--accent) 10px,
+		var(--accent-strong) 10px, var(--accent-strong) 20px
+	);
+	transition: width 0.3s steps(12);
+	/* as faixas andam pra dar a sensação de "carregando" de verdade, mesmo
+	   nos instantes entre uma atualização de progresso e outra (só mudar a
+	   largura, do jeito que era antes, ficava parado demais nesses
+	   intervalos). Só background-position, nada de filter nem
+	   mix-blend-mode — é o tipo de animação que já confirmamos funcionar
+	   direto no Chromium do GMod. */
+	animation: progress-stripes 0.6s linear infinite;
+}
+@keyframes progress-stripes {
+	from { background-position: 0 0; }
+	to { background-position: 20px 0; }
+}
+/* placa sólida atrás do texto de status/ETA: essa parte do rodapé fica bem
+   no canto inferior esquerdo da tela, exatamente onde a arte de fundo do
+   Muguetos tem a assinatura dele ("Designer by MUGUETO's") — sem essa
+   placa, as duas coisas (nosso texto e a assinatura) ficavam se misturando
+   ali, e nenhuma das duas dava pra ler direito. Mesma solução que já
+   funcionou pro nome do servidor lá no cabeçalho: cor sólida garante
+   leitura em qualquer fundo, sem precisar tunar gradiente nenhum. */
+.footer-status {
+	background: var(--panel-deep);
+	border: 2px solid var(--panel-edge);
+	box-shadow: inset 1px 1px 0 rgba(255,255,255,0.06), inset -1px -1px 0 rgba(0,0,0,0.5);
+	padding: 6px 10px;
+	margin-top: 8px;
+}
+.progress-meta {
+	display: flex;
+	justify-content: space-between;
+	font-size: 15px;
+	color: var(--text-dim);
+}
+
+/* mensagem de tempo estimado até entrar no servidor de verdade (fica
+   embaixo da barra, não é uma aba — é sempre visível, já que é curtinha) */
+.eta-text {
+	margin-top: 4px;
+	font-size: 14px;
+	color: var(--accent);
+	text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+}
+
+/* ---------- responsivo (telas pequenas / 4:3) ---------- */
+@media (max-width: 760px) {
+	.screen { padding: 16px 18px 110px; }
+	.panels { grid-template-columns: 1fr; width: 100%; }
+	.panel-card { max-height: 130px; }
+	/* só 1 coluna existe aqui — sem isso o Mods (que pede 2 colunas na tela
+	   grande) forçava o navegador a criar uma 2ª coluna implícita mesmo
+	   nessa largura, quebrando o empilhamento de coluna única. */
+	#panel-mods { grid-column: span 1; }
+}
+
+/* =====================================================================================================
+   VISUAL FRUTIGER AERO (2026-11) — camada por cima de tudo acima.
+   Vidro com cantos arredondados, brilho na metade de cima, céu azul-água, colina verde e bolhas.
+   Só usa o que funciona no Chromium "fora da tela" do GMod: degradês, border-radius, box-shadow,
+   transform e opacity (nada de filter, backdrop-filter nem mix-blend-mode).
+   ===================================================================================================== */
+:root {
+	--accent: #5fd0ff;
+	--accent-strong: #1896de;
+	--accent-deep: #0b5fa0;
+	--bg-dark: #06223e;
+	--panel-bg: rgba(14, 62, 104, 0.80);
+	--panel-border: rgba(255, 255, 255, 0.38);
+	--panel-edge: rgba(255, 255, 255, 0.20);
+	--panel-deep: rgba(4, 30, 56, 0.55);
+	--text-main: #f4fbff;
+	--text-dim: #a8d4ef;
+	--leaf: #7ed957;
+	--glass-top: linear-gradient(180deg, rgba(255,255,255,0.30) 0%, rgba(255,255,255,0.10) 46%, rgba(255,255,255,0.02) 50%, rgba(255,255,255,0) 100%);
+}
+
+html, body {
+	font-family: "Segoe UI", "Trebuchet MS", "Helvetica Neue", Arial, sans-serif;
+	font-size: 15px;
+}
+.pixel-font, .server-info #server-name, .panel-card h3, .profile-stat .value, .profile-alert strong {
+	font-family: "Segoe UI Semibold", "Segoe UI", "Trebuchet MS", Arial, sans-serif !important;
+	letter-spacing: 0.2px;
+}
+
+/* céu por cima das fotos (o tingimento roxo antigo sai) */
+.bg-tint { display: none; }
+.bg-dim { background: rgba(4, 22, 44, 0.45); }
+.bg-overlay {
+	background:
+		radial-gradient(ellipse 700px 420px at 0% 0%, rgba(4, 30, 60, 0.85) 0%, rgba(4, 30, 60, 0) 100%),
+		radial-gradient(ellipse 900px 520px at 70% -10%, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0) 70%),
+		linear-gradient(180deg, rgba(40, 150, 220, 0.55) 0%, rgba(14, 80, 140, 0.35) 45%, rgba(4, 34, 66, 0.82) 100%);
+}
+
+/* colina verde e brilho do horizonte (a "natureza" da Aero) */
+.aero-hill {
+	position: absolute;
+	left: -20%;
+	right: -20%;
+	bottom: -62vh;
+	height: 80vh;
+	z-index: 3;
+	border-radius: 50%;
+	background: radial-gradient(ellipse at 50% 0%, rgba(150, 230, 100, 0.55) 0%, rgba(50, 150, 60, 0.45) 30%, rgba(10, 60, 30, 0) 70%);
+	pointer-events: none;
+}
+
+/* bolhas subindo devagar */
+.aero-bubbles { position: absolute; inset: 0; z-index: 3; overflow: hidden; pointer-events: none; }
+.aero-bubbles span {
+	position: absolute;
+	bottom: -80px;
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
+	background:
+		radial-gradient(circle at 32% 28%, rgba(255,255,255,0.85) 0%, rgba(255,255,255,0.85) 10%, rgba(255,255,255,0) 22%),
+		radial-gradient(circle at 50% 50%, rgba(170, 230, 255, 0.06) 55%, rgba(200, 240, 255, 0.35) 70%, rgba(255,255,255,0.55) 74%, rgba(255,255,255,0) 76%);
+	animation: aero-rise 16s linear infinite;
+	opacity: 0;
+}
+.aero-bubbles span:nth-child(1)  { left: 6%;  width: 22px; height: 22px; animation-duration: 14s; animation-delay: 0s; }
+.aero-bubbles span:nth-child(2)  { left: 14%; width: 40px; height: 40px; animation-duration: 19s; animation-delay: 3s; }
+.aero-bubbles span:nth-child(3)  { left: 23%; width: 16px; height: 16px; animation-duration: 12s; animation-delay: 6s; }
+.aero-bubbles span:nth-child(4)  { left: 35%; width: 30px; height: 30px; animation-duration: 17s; animation-delay: 1s; }
+.aero-bubbles span:nth-child(5)  { left: 47%; width: 52px; height: 52px; animation-duration: 22s; animation-delay: 8s; }
+.aero-bubbles span:nth-child(6)  { left: 58%; width: 20px; height: 20px; animation-duration: 13s; animation-delay: 4s; }
+.aero-bubbles span:nth-child(7)  { left: 66%; width: 36px; height: 36px; animation-duration: 18s; animation-delay: 10s; }
+.aero-bubbles span:nth-child(8)  { left: 74%; width: 24px; height: 24px; animation-duration: 15s; animation-delay: 2s; }
+.aero-bubbles span:nth-child(9)  { left: 82%; width: 46px; height: 46px; animation-duration: 21s; animation-delay: 7s; }
+.aero-bubbles span:nth-child(10) { left: 89%; width: 18px; height: 18px; animation-duration: 12s; animation-delay: 5s; }
+.aero-bubbles span:nth-child(11) { left: 94%; width: 28px; height: 28px; animation-duration: 16s; animation-delay: 11s; }
+.aero-bubbles span:nth-child(12) { left: 40%; width: 14px; height: 14px; animation-duration: 11s; animation-delay: 9s; }
+@keyframes aero-rise {
+	0%   { transform: translate(0, 0); opacity: 0; }
+	8%   { opacity: 0.9; }
+	50%  { transform: translate(18px, -55vh); }
+	92%  { opacity: 0.8; }
+	100% { transform: translate(-10px, -115vh); opacity: 0; }
+}
+
+/* enfeites dos cantos viram bolinhas de vidro */
+.corner-deco { clip-path: none; border-radius: 50%; width: 14px; height: 14px; }
+.corner-deco--tl { background: radial-gradient(circle at 35% 30%, #ffffff 0%, #9fe4ff 30%, #1896de 100%); box-shadow: 0 0 12px 2px rgba(95, 208, 255, 0.8); }
+.corner-deco--tr { background: radial-gradient(circle at 35% 30%, #ffffff 0%, #c8f5a0 30%, #4caf3a 100%); box-shadow: 0 0 12px 2px rgba(126, 217, 87, 0.8); }
+
+/* moldura: de cantos cortados em pixel pra vidro arredondado */
+.pixel-frame { clip-path: none !important; border-radius: 14px; }
+.pixel-frame::before { display: none; }
+
+.panel-card {
+	background: var(--glass-top), linear-gradient(180deg, rgba(30, 110, 170, 0.82) 0%, rgba(10, 52, 92, 0.86) 100%);
+	border: 1px solid var(--panel-border);
+	border-radius: 14px;
+	box-shadow: 0 8px 22px rgba(0, 20, 50, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -1px 0 rgba(120, 220, 255, 0.25);
+}
+/* cor de cada quadro: tons Aero (vidro azul, folha, céu...) */
+#panel-curiosidades { --accent: #7fdcff; }
+#panel-fanarts       { --accent: #ff9fd0; }
+#panel-perfil        { --accent: #9ee6ff; }
+#panel-servidor      { --accent: #b9c8ff; }
+#panel-mods          { --accent: #ffc27a; }
+#panel-clima         { --accent: #9ff07a; }
+#panel-musica        { --accent: #6fe0e0; }
+#panel-creditos      { --accent: #ffe07a; }
+#panel-curiosidades, #panel-fanarts, #panel-perfil, #panel-servidor, #panel-mods, #panel-clima, #panel-musica, #panel-creditos {
+	--panel-border: rgba(255, 255, 255, 0.38);
+	--panel-edge: rgba(255, 255, 255, 0.20);
+}
+.panel-card h3 {
+	font-size: 15px;
+	color: var(--accent);
+	text-shadow: 0 1px 2px rgba(0, 20, 50, 0.8), 0 0 8px rgba(120, 220, 255, 0.35);
+}
+.panel-card h4 { font-size: 12px; }
+.curiosity { font-size: 15px; line-height: 1.45; }
+
+/* tudo que era caixinha quadrada vira vidro arredondado */
+.kv-list li, .music-track-list li, .mod-list li, .fanart-card, .profile-stat, .city-icon-wrap, .footer-status, .brand-text, .profile-alert {
+	background: linear-gradient(180deg, rgba(255,255,255,0.14) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0.02) 100%), var(--panel-deep);
+	border: 1px solid var(--panel-edge);
+	border-radius: 9px;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+.fanart-card { overflow: hidden; }
+.fanart-card img { background: rgba(4, 30, 56, 0.6); }
+.fanart-card figcaption { border-top: 1px solid var(--panel-edge); }
+.music-track-list li.is-playing { border-color: var(--accent); box-shadow: inset 0 1px 0 rgba(255,255,255,0.35), 0 0 10px rgba(95, 208, 255, 0.35); }
+.mod-status { border-width: 1px; border-radius: 999px; padding: 2px 8px; }
+.profile-alert { border-color: rgba(255, 110, 130, 0.7); background: linear-gradient(180deg, rgba(255,255,255,0.12), rgba(255, 80, 100, 0.12)); }
+.kv-list li, .music-track-list li { font-size: 13px; }
+
+/* topo: nome e logo */
+.brand-text { padding: 6px 12px; }
+.brand-mark { font-family: "Segoe UI Black", "Segoe UI", Arial, sans-serif; font-size: 17px; letter-spacing: 0.5px; text-shadow: 0 1px 3px rgba(0, 20, 50, 0.9); }
+.brand-mark span { color: var(--leaf); }
+.server-info #server-name { font-size: 18px; text-shadow: 0 1px 3px rgba(0, 20, 50, 0.9); }
+.server-info #map-name { color: #9fe4ff; }
+.brand-logo { border: none; border-radius: 50%; width: 68px; height: 68px; object-fit: contain; box-shadow: 0 6px 16px rgba(0, 20, 50, 0.5); }
+
+/* barra de progresso: pílula de vidro azul -> verde, com brilho correndo */
+.progress-track {
+	height: 18px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.35);
+	background: linear-gradient(180deg, rgba(0, 0, 0, 0.35), rgba(255, 255, 255, 0.06)), rgba(4, 30, 56, 0.7);
+	box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5), 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+.progress-fill {
+	border-radius: 999px;
+	background-color: #1896de;
+	background-image:
+		linear-gradient(180deg, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.25) 48%, rgba(255,255,255,0) 52%, rgba(255,255,255,0.12) 100%),
+		linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.45) 50%, rgba(255,255,255,0) 100%),
+		linear-gradient(90deg, #1896de 0%, #36c2e8 55%, #7ed957 100%);
+	background-size: 100% 100%, 120px 100%, 100% 100%;
+	background-repeat: no-repeat, repeat-x, no-repeat;
+	transition: width 0.35s ease;
+	animation: aero-sheen 1.8s linear infinite;
+}
+@keyframes aero-sheen {
+	from { background-position: 0 0, -120px 0, 0 0; }
+	to   { background-position: 0 0, 600px 0, 0 0; }
+}
+.progress-meta { font-size: 14px; }
+.eta-text { color: #9fe4ff; text-shadow: 0 1px 2px rgba(0, 20, 50, 0.8); }
+
+.panel-card::-webkit-scrollbar-track { background: rgba(4, 30, 56, 0.5); border-radius: 8px; }
+.panel-card::-webkit-scrollbar-thumb { background: linear-gradient(90deg, #5fd0ff, #1896de); border: 2px solid rgba(4, 30, 56, 0.5); border-radius: 8px; }
